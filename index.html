@@ -138,6 +138,108 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-dev-2017-07-15-java-web-content-encoding" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/15/dev-2017-07-15-java-web-content-encoding/">Java网站开发之文件编码</a>
+    </h1>
+  
+
+        
+        <a href="/2017/07/15/dev-2017-07-15-java-web-content-encoding/" class="archive-article-date">
+  	<time datetime="2017-07-15T10:50:18.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前几天，有同事在Java网站开发时，修改了JSP文件的<code>pageEncoding</code>参数，测试时没有问题，但在部署现网时，加载外部js时，js文件中中文显示为乱码。<br>这是对Java后台的编码机制和浏览器选择解码的规则不熟悉导致的，一旦熟悉了规则，对此问题就会有很好的理解。</p>
+<p>今天我们就来讲一讲前后端编解码的一些规则。</p>
+<h2 id="Java后台的编解码规则"><a href="#Java后台的编解码规则" class="headerlink" title="Java后台的编解码规则"></a>Java后台的编解码规则</h2><h3 id="JSP页面的编码规则"><a href="#JSP页面的编码规则" class="headerlink" title="JSP页面的编码规则"></a>JSP页面的编码规则</h3><p>在了解JSP页面的编码规则之前，需要先了解JSP页面的编译过程</p>
+<ul>
+<li>JSP页面要经过<strong>三次</strong>“编译”才能到达用户浏览器上，两次的编码过程为：<code>JSP -&gt; Java -&gt; class -&gt; http报文</code></li>
+<li>三次”编译”中涉及到两次<code>文件编码</code>转换，<code>JSP(指定编码) -&gt; Java(UTF-8) -&gt; class(UTF-8) -&gt; http报文(指定编码)</code></li>
+<li><code>JSP(指定编码) -&gt; Java(UTF-8)</code> 是由指定的编码方案翻译成统一的UTF-8格式的Java源码，转换器会根据<code>pageEncoding</code>的设定读取JSP文件</li>
+<li><code>Java(UTF-8) -&gt; class(UTF-8)</code>是由<code>JAVAC</code>用UTF-8的格式读取java源码，再以UTF-8格式编译字节码（即.class）</li>
+<li><code>class(UTF-8) -&gt; http报文(指定编码)</code>是<code>Web容器</code>(如：<code>Tomcat</code>)载入和执行字节码，输出HTTP报文，此时会使用<code>contentType</code>进行转换</li>
+<li>和<code>contentType</code>效果一样的设置方式还有<code>response.setCharacterEncoding()</code></li>
+</ul>
+<p>所以以上涉及到两个编码参数：<code>pageEncoding</code>和<code>contentType</code>，JSP中书写格式为：<code>&lt;%@ page contentType=&quot;text/html;charset=GB2312&quot; pageEncoding=&quot;UTF-8&quot; %&gt;</code></p>
+<p>在<code>Tomcat</code>和<code>Jetty</code>中，如果只编写了一个编码属性，则缺失的编码默认与写了的一致（有一些Web容器不是如此实现），如：</p>
+<ul>
+<li><code>pageEncoding</code>缺失，而<code>contentType=&quot;text/html;charset=GB2312</code>，则<code>pageEncoding</code>的编码为<code>GB2312</code></li>
+<li><code>contentType</code>缺失，而<code>pageEncoding=&quot;UTF-8&quot;</code>，则<code>contentType</code>的编码为<code>UTF-8</code></li>
+</ul>
+<h2 id="浏览器端的编解码规则"><a href="#浏览器端的编解码规则" class="headerlink" title="浏览器端的编解码规则"></a>浏览器端的编解码规则</h2><h3 id="网页编码规则"><a href="#网页编码规则" class="headerlink" title="网页编码规则"></a>网页编码规则</h3><p>优先级由高到低顺序，优先级顺序如下：</p>
+<ol>
+<li>HTTP协议中的<code>Content-Type</code>字段的<code>charset</code>参数，如：<code>Content-Type:text/html;charset=utf-8</code></li>
+<li><code>meta</code>元素中的<code>charset</code>（如：<code>&lt;meta charset=&quot;utf-8&quot; /&gt;</code>）属性或<code>http-equiv=&quot;Content-Type&quot;</code>的<code>charset</code>参数（如：<code>&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=utf-8&quot; /&gt;</code>），这两个的优先级相同，如果同时出现以第一个为准</li>
+<li>使用浏览器插件修改编码（chrome浏览器高版本去掉了修改字符编码的功能，需要下载插件），此操作应该是优先级最高的，但是浏览器解析的过程会自动执行<code>1.</code>和<code>2.</code>，而此操作是需要手动触发的，所以将此操作的优先级设置为低</li>
+</ol>
+<h3 id="加载外部js或css文件的编码规则"><a href="#加载外部js或css文件的编码规则" class="headerlink" title="加载外部js或css文件的编码规则"></a>加载外部<code>js</code>或<code>css</code>文件的编码规则</h3><p>优先级由高到低顺序，优先级顺序如下：</p>
+<ol>
+<li>HTTP协议中的<code>Content-Type</code>字段的<code>charset</code>参数，如：<code>Content-Type:application/javascript;charset=utf-8</code></li>
+<li><code>script</code>标签中的<code>charset</code>属性，如：<code>&lt;script src=&quot;./***.js&quot; charset=&quot;utf-8&quot;&gt;&lt;/script&gt;</code></li>
+<li>加载外部<code>js</code>和<code>css</code>的网页的编码</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/07/15/dev-2017-07-15-java-web-content-encoding/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-dev-2017-05-31-webpack-base-config" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -618,11 +720,11 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">gulp</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">gulp</a>
         		</li>
       		
 		</ul>
@@ -725,11 +827,11 @@
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
         		</li>
       		
 		</ul>
@@ -1110,7 +1212,7 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">gulp</a>
+                <a href="javascript:void(0)" class="js-tag color3">angular</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1118,15 +1220,15 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">angular</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">书写规范</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
+                <a href="javascript:void(0)" class="js-tag color5">gulp</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1142,11 +1244,15 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
+                <a href="javascript:void(0)" class="js-tag color5">Java</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
               </li>
             
             <div class="clearfix"></div>
