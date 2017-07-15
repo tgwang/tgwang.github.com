@@ -5,15 +5,15 @@
   
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>浅析HTTP代理原理 | tgwang的博客</title>
+  <link rel="dns-prefetch" href="http://blog.yunyear.com">
+  <title>浅析HTTP代理原理 | 云叶-博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="代理服务器是HTTP协议中一个重要的组件，发挥着重要的作用。 关于HTTP代理的文章有很多，本文不再赘述，如果不清楚的可以看一下 HTTP代理的基础知识。 本文主要介绍代理的事例，分析一个真实的案例来帮助理解HTTP代理的原理。 HTTP代理的原理下面分析一个 http://iflow.uczzd.cn/iflow/api/v1/client_event?app=uc-iflow...经过代理服务">
 <meta name="keywords" content="HTTP">
 <meta property="og:type" content="article">
 <meta property="og:title" content="浅析HTTP代理原理">
-<meta property="og:url" content="http://yoursite.com/2016/01/30/dev-2016-01-30-http-proxy/index.html">
-<meta property="og:site_name" content="tgwang的博客">
+<meta property="og:url" content="http://blog.yunyear.com/2016/01/30/dev-2016-01-30-http-proxy/index.html">
+<meta property="og:site_name" content="云叶-博客">
 <meta property="og:description" content="代理服务器是HTTP协议中一个重要的组件，发挥着重要的作用。 关于HTTP代理的文章有很多，本文不再赘述，如果不清楚的可以看一下 HTTP代理的基础知识。 本文主要介绍代理的事例，分析一个真实的案例来帮助理解HTTP代理的原理。 HTTP代理的原理下面分析一个 http://iflow.uczzd.cn/iflow/api/v1/client_event?app=uc-iflow...经过代理服务">
 <meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129141403099-1459259830.png">
 <meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129151402349-903122792.png">
@@ -29,7 +29,7 @@
 <meta name="twitter:description" content="代理服务器是HTTP协议中一个重要的组件，发挥着重要的作用。 关于HTTP代理的文章有很多，本文不再赘述，如果不清楚的可以看一下 HTTP代理的基础知识。 本文主要介绍代理的事例，分析一个真实的案例来帮助理解HTTP代理的原理。 HTTP代理的原理下面分析一个 http://iflow.uczzd.cn/iflow/api/v1/client_event?app=uc-iflow...经过代理服务">
 <meta name="twitter:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129141403099-1459259830.png">
   
-    <link rel="alternative" href="/atom.xml" title="tgwang的博客" type="application/atom+xml">
+    <link rel="alternative" href="/atom.xml" title="云叶-博客" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -59,7 +59,7 @@
 			<img src="/assets/blog/avatar.png" class="js-avatar">
 		</a>
 		<hgroup>
-		  <h1 class="header-author"><a href="/">tgwang</a></h1>
+		  <h1 class="header-author"><a href="/">云叶博客</a></h1>
 		</hgroup>
 		
 		<p class="header-subtitle">迷茫、思考、学习 -&gt; 迷茫、思考、学习 -&gt; ...</p>
@@ -109,7 +109,7 @@
 				<img src="/assets/blog/avatar.png" class="js-avatar">
 			</div>
 			<hgroup>
-			  <h1 class="header-author js-header-author">tgwang</h1>
+			  <h1 class="header-author js-header-author">云叶博客</h1>
 			</hgroup>
 			
 			<p class="header-subtitle"><i class="icon icon-quo-left"></i>迷茫、思考、学习 -&gt; 迷茫、思考、学习 -&gt; ...<i class="icon icon-quo-right"></i></p>
@@ -264,7 +264,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2016/01/30/dev-2016-01-30-http-proxy/" alt="微信分享二维码">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://blog.yunyear.com/2016/01/30/dev-2016-01-30-http-proxy/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -330,7 +330,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2017 tgwang
+    		&copy; 2017 云叶博客
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -430,10 +430,6 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
               </li>
              
@@ -447,6 +443,10 @@
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">maven</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
               </li>
              
               <li class="article-tag-list-item">
