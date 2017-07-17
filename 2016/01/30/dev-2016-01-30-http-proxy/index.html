@@ -15,19 +15,19 @@
 <meta property="og:url" content="http://blog.yunyear.com/2016/01/30/dev-2016-01-30-http-proxy/index.html">
 <meta property="og:site_name" content="云叶-博客">
 <meta property="og:description" content="代理服务器是HTTP协议中一个重要的组件，发挥着重要的作用。 关于HTTP代理的文章有很多，本文不再赘述，如果不清楚的可以看一下 HTTP代理的基础知识。 本文主要介绍代理的事例，分析一个真实的案例来帮助理解HTTP代理的原理。 HTTP代理的原理下面分析一个 http://iflow.uczzd.cn/iflow/api/v1/client_event?app=uc-iflow...经过代理服务">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129141403099-1459259830.png">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129151402349-903122792.png">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129151545661-2008727981.png">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129154209271-308333233.png">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129154311099-1052006955.png">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160130165301864-2051236191.png">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160130170415864-1885680798.png">
-<meta property="og:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160130170522114-1875891389.png">
-<meta property="og:updated_time" content="2017-07-15T05:15:27.971Z">
+<meta property="og:image" content="http://wx2.sinaimg.cn/mw690/8d4fceccgy1fhmroni6rej212n0143yh.jpg">
+<meta property="og:image" content="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhmroo9hxnj213b0cvwfn.jpg">
+<meta property="og:image" content="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhmroammpej213o0c8wfp.jpg">
+<meta property="og:image" content="http://wx1.sinaimg.cn/mw690/8d4fceccgy1fhmrobe8f8j20d609baae.jpg">
+<meta property="og:image" content="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhmrobsb27j20an0bedg8.jpg">
+<meta property="og:image" content="http://wx2.sinaimg.cn/mw690/8d4fceccgy1fhmroimc16j20sn0h73z8.jpg">
+<meta property="og:image" content="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhmrojg37cj20l607ywev.jpg">
+<meta property="og:image" content="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhmrol9uuoj20y20j5ab7.jpg">
+<meta property="og:updated_time" content="2017-07-17T04:32:35.144Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="浅析HTTP代理原理">
 <meta name="twitter:description" content="代理服务器是HTTP协议中一个重要的组件，发挥着重要的作用。 关于HTTP代理的文章有很多，本文不再赘述，如果不清楚的可以看一下 HTTP代理的基础知识。 本文主要介绍代理的事例，分析一个真实的案例来帮助理解HTTP代理的原理。 HTTP代理的原理下面分析一个 http://iflow.uczzd.cn/iflow/api/v1/client_event?app=uc-iflow...经过代理服务">
-<meta name="twitter:image" content="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129141403099-1459259830.png">
+<meta name="twitter:image" content="http://wx2.sinaimg.cn/mw690/8d4fceccgy1fhmroni6rej212n0143yh.jpg">
   
     <link rel="alternative" href="/atom.xml" title="云叶-博客" type="application/atom+xml">
   
@@ -172,27 +172,27 @@
 <h2 id="HTTP代理的原理"><a href="#HTTP代理的原理" class="headerlink" title="HTTP代理的原理"></a>HTTP代理的原理</h2><p>下面分析一个 <code>http://iflow.uczzd.cn/iflow/api/v1/client_event?app=uc-iflow...</code>经过代理服务器的HTTP请求。 <code>iflow.uczzd.cn</code>的公网IP是<code>140.205.136.82</code>（各地测试到的IP有可能不同），我的局域网IP是<code>192.168.100.115</code>，代理服务器的IP是<code>192.168.16.35</code>。</p>
 <p>再简单说一下HTTP请求的流程： <code>192.168.100.115</code>向<code>140.205.136.82</code>发送HTTP请求,其中<code>192.168.16.35</code>是代理服务器。</p>
 <h3 id="一、-监控请求"><a href="#一、-监控请求" class="headerlink" title="一、 监控请求"></a>一、 监控请求</h3><p>通过网络监控获取到的HTTP请求如下：</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129141403099-1459259830.png" alt="网络监控HTTP请求"></p>
+<p><img src="http://wx2.sinaimg.cn/mw690/8d4fceccgy1fhmroni6rej212n0143yh.jpg" alt="网络监控HTTP请求"></p>
 <p>可以看到在网络监控中，有两个HTTP请求，一个是向代理服务器发送的HTTP，另一个是代理服务器想目标服务器发送的HTTP请求。这两个请求的请求体是一样的，如下图：</p>
 <p>客户端向代理服务器发送的HTTP报文：</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129151402349-903122792.png" alt="发向Proxy服务器"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhmroo9hxnj213b0cvwfn.jpg" alt="发向Proxy服务器"></p>
 <p>代理服务器想目标服务器发送的HTTP报文：</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129151545661-2008727981.png" alt="发向目标服务器"></p>
+<p><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhmroammpej213o0c8wfp.jpg" alt="发向目标服务器"></p>
 <h3 id="二、-推测处理流程"><a href="#二、-推测处理流程" class="headerlink" title="二、 推测处理流程"></a>二、 推测处理流程</h3><p>可以看到，两张图片的HTTP报文是相同的（也有可能Header不同），我们可以推测出客户端和代理服务器的处理流程，如下：</p>
 <p>客户端的处理流程：</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129154209271-308333233.png" alt="客户端的处理流程"></p>
+<p><img src="http://wx1.sinaimg.cn/mw690/8d4fceccgy1fhmrobe8f8j20d609baae.jpg" alt="客户端的处理流程"></p>
 <p>代理服务器的处理流程：</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160129154311099-1052006955.png" alt="代理服务器的处理流程"></p>
+<p><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhmrobsb27j20an0bedg8.jpg" alt="代理服务器的处理流程"></p>
 <h3 id="三、-验证推测的处理流程"><a href="#三、-验证推测的处理流程" class="headerlink" title="三、 验证推测的处理流程"></a>三、 验证推测的处理流程</h3><p>在推测出客户端和代理服务器的处理逻辑后，我们需要验证我们的推测是否正确。</p>
 <p>我们可以构造一个TCP请求，客户端连接到代理服务器，发送HTTP报文，报文的内容是客户端直接发送到服务器的内容。</p>
 <p>例如：直接访问 <code>http://www.cnblogs.com/tgwang/</code>的HTTP报文是：<br><figure class="highlight http"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">GET</span> <span class="string">http://www.cnblogs.com/tgwang/</span> HTTP/1.1</div><div class="line"><span class="attribute">Host</span>: www.cnblogs.com</div><div class="line"><span class="attribute">Connection</span>: close</div><div class="line"><span class="attribute">Accept</span>: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8</div><div class="line"><span class="attribute">Upgrade-Insecure-Requests</span>: 1</div><div class="line"><span class="attribute">User-Agent</span>: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36</div><div class="line"><span class="attribute">Referer</span>: http://www.cnblogs.com/</div><div class="line"><span class="attribute">Accept-Encoding</span>: gzip, deflate, sdch</div><div class="line"><span class="attribute">Accept-Language</span>: zh-CN,zh;q=0.8</div><div class="line"><span class="attribute">Cookie</span>: ***</div><div class="line"><span class="attribute">If-Modified-Since</span>: Sat, 30 Jan 2016 02:48:23 GMT</div></pre></td></tr></table></figure></p>
 <p>我们构造一个TCP请求，连接代理服务器，报文的内容也是发送上面的报文，看代理服务器能否正常请求博客园的数据，<strong>如果可以正常请求</strong>，说明我们对于客户端和代理服务器推测是正确的，<strong>如果没有请求博客园数据，而是返回代理服务器的相关信息</strong>，表示推测错误。</p>
 <p>下面我使用python向代理服务器<code>127.0.0.1:8888</code>发送一个TCP请求，为了在代理服务器中能找到此请求，我在Header中增加了一个Token，使用UUID标识（见红框）。</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160130165301864-2051236191.png" alt="Python发送HTTP请求"></p>
+<p><img src="http://wx2.sinaimg.cn/mw690/8d4fceccgy1fhmroimc16j20sn0h73z8.jpg" alt="Python发送HTTP请求"></p>
 <p>运行程序，发送TCP请求，报文如下：</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160130170415864-1885680798.png" alt="proxy请求报文"></p>
+<p><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhmrojg37cj20l607ywev.jpg" alt="proxy请求报文"></p>
 <p>查看代理服务器的信息，可知，HTTP请求正常发送到博客园，并且正常响应，如下图：</p>
-<p><img src="http://images2015.cnblogs.com/blog/519052/201601/519052-20160130170522114-1875891389.png" alt="代理服务器监控"></p>
+<p><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhmrol9uuoj20y20j5ab7.jpg" alt="代理服务器监控"></p>
 <p>到此推测验证完成，<strong>符合预期结果</strong>。</p>
 <p><strong>书本上的理论看多了，就以为自己看懂了，然而我们真的懂了吗？没动手实践过能算是懂了吗</strong></p>
 
@@ -422,11 +422,11 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">书写规范</a>
+                <a href="javascript:void(0)" class="js-tag color5">gulp</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">gulp</a>
+                <a href="javascript:void(0)" class="js-tag color5">书写规范</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -434,11 +434,11 @@
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
+                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
               </li>
              
               <li class="article-tag-list-item">
