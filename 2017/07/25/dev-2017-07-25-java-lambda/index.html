@@ -6,17 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.yunyear.com">
-  <title>Archives: 2016/1 | 云叶-博客</title>
+  <title>Java8学习之lambda表达式（一） | 云叶-博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
-<meta property="og:type" content="website">
-<meta property="og:title" content="云叶-博客">
-<meta property="og:url" content="http://blog.yunyear.com/archives/2016/01/index.html">
+  <meta name="description" content="lambda表达式的使用目的 增加代码可读性 简化编码  语法 语法形式：parameter -&amp;gt; expression body 语法组成：参数列表 + 箭头[-&amp;gt;] + 表达式体，如：(int x, int y) -&amp;gt; x + y或(x, y) -&amp;gt; x + y  说明 类型声明：参数的类型可以不声明，编译器可以根据参数值推断出其类型。 参数括号：单个参数的话，不需要使">
+<meta name="keywords" content="java,lambda表达式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java8学习之lambda表达式（一）">
+<meta property="og:url" content="http://blog.yunyear.com/2017/07/25/dev-2017-07-25-java-lambda/index.html">
 <meta property="og:site_name" content="云叶-博客">
-<meta property="og:description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
+<meta property="og:description" content="lambda表达式的使用目的 增加代码可读性 简化编码  语法 语法形式：parameter -&amp;gt; expression body 语法组成：参数列表 + 箭头[-&amp;gt;] + 表达式体，如：(int x, int y) -&amp;gt; x + y或(x, y) -&amp;gt; x + y  说明 类型声明：参数的类型可以不声明，编译器可以根据参数值推断出其类型。 参数括号：单个参数的话，不需要使">
+<meta property="og:image" content="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvn6hfqj20cr098aa7.jpg">
+<meta property="og:image" content="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvmg4yxj20ec00vq2p.jpg">
+<meta property="og:image" content="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvord68j20aw07g74b.jpg">
+<meta property="og:image" content="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvnodsfj20d000pgld.jpg">
+<meta property="og:updated_time" content="2017-07-25T14:19:31.059Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="云叶-博客">
-<meta name="twitter:description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
+<meta name="twitter:title" content="Java8学习之lambda表达式（一）">
+<meta name="twitter:description" content="lambda表达式的使用目的 增加代码可读性 简化编码  语法 语法形式：parameter -&amp;gt; expression body 语法组成：参数列表 + 箭头[-&amp;gt;] + 表达式体，如：(int x, int y) -&amp;gt; x + y或(x, y) -&amp;gt; x + y  说明 类型声明：参数的类型可以不声明，编译器可以根据参数值推断出其类型。 参数括号：单个参数的话，不需要使">
+<meta name="twitter:image" content="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvn6hfqj20cr098aa7.jpg">
   
     <link rel="alternative" href="/atom.xml" title="云叶-博客" type="application/atom+xml">
   
@@ -146,106 +153,184 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-dev-2017-07-25-java-lambda" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/01/30/dev-2016-01-30-http-proxy/" class="archive-article-date">
-  	<time datetime="2016-01-30T09:24:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-01-30</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/30/dev-2016-01-30-http-proxy/">浅析HTTP代理原理</a>
+    <h1 class="article-title" itemprop="name">
+      Java8学习之lambda表达式（一）
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2017/07/25/dev-2017-07-25-java-lambda/" class="archive-article-date">
+  	<time datetime="2017-07-25T13:13:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="lambda表达式的使用"><a href="#lambda表达式的使用" class="headerlink" title="lambda表达式的使用"></a>lambda表达式的使用</h2><h3 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h3><ul>
+<li>增加代码可读性</li>
+<li>简化编码</li>
+</ul>
+<h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><ul>
+<li>语法形式：<code>parameter -&gt; expression body</code></li>
+<li>语法组成：<code>参数列表 + 箭头[-&gt;] + 表达式体</code>，如：<code>(int x, int y) -&gt; x + y</code>或<code>(x, y) -&gt; x + y</code></li>
+</ul>
+<h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><ul>
+<li>类型声明：参数的类型可以不声明，编译器可以根据参数值推断出其类型。</li>
+<li>参数括号：单个参数的话，不需要使用圆括包裹参数。但多个参数或无参数必须要添加。</li>
+<li>表达式体花括号：如果表达式体只有一条语句，不需要用花括号包裹，如果是多条语句，必须使用花括号包裹。</li>
+<li>return关键字：如果表达式体只有一条语句，return关键字可以不写，编译器可以自动返回该值，如果写了return，则表达式体必须加上花括号。</li>
+</ul>
+<h3 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        MathInterface plus = (x, y) -&gt; x + y;</div><div class="line">        <span class="keyword">int</span> a = plus.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line"></div><div class="line">        System.out.println(plus.getClass().getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">MathInterface</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> m, <span class="keyword">int</span> n)</span></span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="深入了解lambda表达式"><a href="#深入了解lambda表达式" class="headerlink" title="深入了解lambda表达式"></a>深入了解lambda表达式</h2><h3 id="函数式接口"><a href="#函数式接口" class="headerlink" title="函数式接口"></a>函数式接口</h3><p>要了解 <strong>lambda表达式</strong>之前我们要先了解另外一个概念： <strong>函数式接口</strong>，此处我们只是简单的讲一下函数式接口，具体的信息我们会后面有机会单独讲。</p>
+<p>函数式接口是一个只有一个抽象方法的接口，这种类型的接口也称为 <strong>SAM接口</strong>，即<code>Single Abstract Method interfaces</code>。<br>根据上面的定义，我们提炼出两条函数式接口的规则：</p>
+<ul>
+<li>是一个接口</li>
+<li>只有一个抽象方法</li>
+</ul>
+<p>Java8引入了一个新注解<code>@FunctionalInterface</code>，用来标识函数式接口。但是如果某个接口没有此注解，然而却满足函数式接口的规则，那么这个接口也是函数式接口，这个和<code>@Override</code>非常相似。也就是说这个注解主要用于编译级错误检查，当你编写的接口不符合函数式接口定义的时候，编译器会报错。</p>
+<h3 id="lambda表达式与函数式接口的关系"><a href="#lambda表达式与函数式接口的关系" class="headerlink" title="lambda表达式与函数式接口的关系"></a>lambda表达式与函数式接口的关系</h3><p>lambda表达式是函数式接口的匿名实现。</p>
+<p>实现函数式接口可以有多种形式：</p>
+<ul>
+<li>普通类实现</li>
+<li>匿名类实现</li>
+<li>lambda表达式实现</li>
+</ul>
+<p>普通类实现经常见到，此处不过多讲解。此处重点讲解一下匿名类实现和lambda表达式实现，示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="comment">// 方式一：匿名类</span></div><div class="line">        MathInterface plus1 = <span class="keyword">new</span> MathInterface() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> m, <span class="keyword">int</span> n)</span> </span>&#123;</div><div class="line">                <span class="keyword">return</span> m + n;</div><div class="line">            &#125;</div><div class="line">        &#125;;</div><div class="line">        <span class="keyword">int</span> a = plus1.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line">        System.out.println(<span class="string">"class: "</span> + a);</div><div class="line"></div><div class="line">        <span class="comment">// 方式二：lambda表达式</span></div><div class="line">        MathInterface plus = (x, y) -&gt; x + y;</div><div class="line">        <span class="keyword">int</span> b = plus.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line">        System.out.println(<span class="string">"lambda: "</span> + b);</div><div class="line"></div><div class="line">        System.out.println(plus.getClass().getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">MathInterface</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> m, <span class="keyword">int</span> n)</span></span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">class: 9</div><div class="line">lambda: 9</div><div class="line">com.yunyear.demo.java8.lambda.Main$$Lambda$1/1543727556</div></pre></td></tr></table></figure></p>
+<p>有很多技术博客把lambda表达式成称为匿名类的语法糖，但是根据编译后生成的class文件和对字节码分析发现，两个的实现方式是不同的。后面会重点分析lambda表达式的字节码分析。</p>
+<p>匿名类代码及编译后生成的文件：<br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvn6hfqj20cr098aa7.jpg" alt="匿名类源代码"><br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvmg4yxj20ec00vq2p.jpg" alt="匿名类字节码文件"></p>
+<p>lambda表达式代码及编译后生成的代码：<br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvord68j20aw07g74b.jpg" alt="lambda表达式源代码"><br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvnodsfj20d000pgld.jpg" alt="lambda表达式字节码文件"></p>
+<p>可以看到：<br>匿名类实现的代码会在编译时编译成内部类字节码，而lambda表达式实现的代码在编译后没有内部类字节码，这是因为lambda表达式实现的代码是在运行时动态生成内部类的，这个与编译时生成内部类的实现方式是不同的。</p>
+<p>下一节我们将深入研究lambda表达式生成的字节码文件，了解lambda表达式的编译和执行机制，敬请期待。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">HTTP</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/01/10/dev-2016-01-10-maven-pom/" class="archive-article-date">
-  	<time datetime="2016-01-10T00:33:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-01-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/10/dev-2016-01-10-maven-pom/">Maven POM详解</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">后端</a>
-        		</li>
-      		 
         		<li class="article-tag-list-item">
         			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">maven</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">lambda表达式</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://blog.yunyear.com/2017/07/25/dev-2017-07-25-java-lambda/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2017/07/22/med-2017-07-22-medical-in-future/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">谈谈未来医疗</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
 
 
           </div>
@@ -268,8 +353,8 @@ var _hmt = _hmt || [];
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

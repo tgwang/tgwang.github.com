@@ -6,12 +6,12 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.yunyear.com">
-  <title>Archives: 2016/1 | 云叶-博客</title>
+  <title>云叶-博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
 <meta property="og:type" content="website">
 <meta property="og:title" content="云叶-博客">
-<meta property="og:url" content="http://blog.yunyear.com/archives/2016/01/index.html">
+<meta property="og:url" content="http://blog.yunyear.com/page/2/index.html">
 <meta property="og:site_name" content="云叶-博客">
 <meta property="og:description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
 <meta name="twitter:card" content="summary">
@@ -148,104 +148,123 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
-  
+    <article id="post-dev-2015-07-08-jquery-file-upload" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/01/30/dev-2016-01-30-http-proxy/" class="archive-article-date">
-  	<time datetime="2016-01-30T09:24:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-01-30</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
     <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/30/dev-2016-01-30-http-proxy/">浅析HTTP代理原理</a>
+      <a class="article-title" href="/2015/07/08/dev-2015-07-08-jquery-file-upload/">浅谈异步上传插件 jquery-file-upload插件</a>
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2015/07/08/dev-2015-07-08-jquery-file-upload/" class="archive-article-date">
+  	<time datetime="2015-07-08T13:24:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-08</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>当我们需要异步上传文件的时候，我们倾向于在网上查找相关的JQuery插件，jquery-file-upload就是我们经常看到的，但是他的主页是英文的，对于我们这些英语比较差的同学来说，简直就是。。。今天就来讲一下最简单的使用方法，如果有写的不好的地方还请拍砖。</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki" target="_blank" rel="external">jQuery File Upload</a>是一个非常优秀的上传组件，主要使用了XHR作为上传方式，并且利用了相当多的现代浏览器功能，所以可以实现诸如批量上传、超大文件上传、图片预览、拖拽上传、上传进度显示、跨域上传等功能。</p>
+<p>他的功能非常强大，API也比较简单，如果能够熟练使用$.ajax的话，相信理解起来也不是多难的事，但是它的UI也会非常难用。个人建议，如果小的组件可以自己定义一套简单的UI，没必要使用那么复杂的东西。如果你一定要使用它的UI的话，建议你看一下<a href="http://avnpc.com/pages/single-file-upload-component-by-jquery-file-upload" target="_blank" rel="external">定制jQuery File Upload为微博式单文件上传</a></p>
+<h2 id="jQuery-File-Upload的简化模型"><a href="#jQuery-File-Upload的简化模型" class="headerlink" title="jQuery File Upload的简化模型"></a>jQuery File Upload的简化模型</h2><p>jQuery File Upload包含了一堆文件，首先需要弄清楚的是最核心的部分是哪些，官网已经给出了最简单的模型<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Basic-plugin#how-to-use-only-the-basic-plugin-minimal-setup-guide" target="_blank" rel="external">基本功能</a>，一个最简单的jQuery File Upload上传组件，必须包括以下文件：</p>
+<ul>
+<li>jQuery库，建议jQuery 1.8以上版本</li>
+<li>js/vendor/jquery.ui.widget.js ： jQuery UI Widget</li>
+<li>js/jquery.iframe-transport.js ： 扩展iframe数据传输</li>
+<li>js/jquery.fileupload.js ： jQuery File Upload核心类</li>
+<li>js/cors/jquery.xdr-transport.js 在IE下应载入此文件解决跨域问题</li>
+</ul>
+<p>官网事例：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE HTML&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>jQuery File Upload Example<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">"fileupload"</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"files[]"</span> <span class="attr">data-url</span>=<span class="string">"server/php/"</span> <span class="attr">multiple</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/vendor/jquery.ui.widget.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.iframe-transport.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.fileupload.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="xml"></span></div><div class="line">$(function () &#123;</div><div class="line">    $('#fileupload').fileupload(&#123;</div><div class="line">        dataType: 'json',</div><div class="line">        done: function (e, data) &#123;</div><div class="line">            $.each(data.result.files, function (index, file) &#123;</div><div class="line">                $('<span class="tag">&lt;<span class="name">p</span>/&gt;</span>').text(file.name).appendTo(document.body);</div><div class="line">            &#125;);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&#125;);</div><div class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span> </div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>当我们需要点击按钮才能提交上传的时候，<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Basic-plugin#how-to-start-uploads-with-a-button-click" target="_blank" rel="external">按钮上传</a></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">$(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">    $(<span class="string">'#fileupload'</span>).fileupload(&#123;</div><div class="line">        <span class="attr">dataType</span>: <span class="string">'json'</span>,</div><div class="line">        <span class="attr">add</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</div><div class="line">            data.context = $(<span class="string">'&lt;button/&gt;'</span>).text(<span class="string">'Upload'</span>)</div><div class="line">                .appendTo(<span class="built_in">document</span>.body)</div><div class="line">                .click(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">                    data.context = $(<span class="string">'&lt;p/&gt;'</span>).text(<span class="string">'Uploading...'</span>).replaceAll($(<span class="keyword">this</span>));</div><div class="line">                    data.submit();</div><div class="line">                &#125;);</div><div class="line">        &#125;,</div><div class="line">        <span class="attr">done</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</div><div class="line">            data.context.text(<span class="string">'Upload finished.'</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<h2 id="浅谈设计原理"><a href="#浅谈设计原理" class="headerlink" title="浅谈设计原理"></a>浅谈设计原理</h2><ol>
+<li>当我们对某个file input标签执行 upload插件的初始化方法后，插件会监听这个file input的change事件</li>
+<li><p>当用户选择文件的时候，会触发change事件</p>
+ <figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ($.support.fileInput) &#123;</div><div class="line">    <span class="keyword">this</span>._on(<span class="keyword">this</span>.options.fileInput, &#123;</div><div class="line">        <span class="attr">change</span>: <span class="keyword">this</span>._onChange</div><div class="line">    &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>在_onChange处理函数中，会遍历files，触发upload插件的change方法</p>
+</li>
+<li>当change函数返回true的时候，会触发upload插件的add方法</li>
+<li>在upload插件的回调函数中，会传入两个参数，fn(事件信息, 数据对象)，这个数据对象非常重要，我们几乎所有的操作都要使用到它</li>
+<li>在upload插件的add方法中可以执行我们的逻辑，例如我们想判断文件后缀是否满足条件，插件自带的参数 acceptFileTypes 在简化模型中不起作用，我们可以在change和add方法中判断，如果不满足返回false即可，如果通过可以直接执行data.submit()进行提交</li>
+<li>如果上传成功会执行done函数（响应成功），失败则会执行fail函数</li>
+<li>所有的回调函数的原理都是一样的，后面的大家自己研究</li>
+</ol>
+<h2 id="自定义UI"><a href="#自定义UI" class="headerlink" title="自定义UI"></a>自定义UI</h2><h3 id="聊聊官网自带UI"><a href="#聊聊官网自带UI" class="headerlink" title="聊聊官网自带UI"></a>聊聊官网自带UI</h3><p>自定义UI模版需要严格按照官网提供的模版进行操作，否则可能会出现各种问题，必要使用他的模版的原因是：ui的JS中操作Dom的逻辑都是固定的，如果你不按照这种格式的话，js查找不到相应的元素，不能获取相应的数据，包括上面提到的data数据。</p>
+<h3 id="探讨自定义UI"><a href="#探讨自定义UI" class="headerlink" title="探讨自定义UI"></a>探讨自定义UI</h3><p><strong>官网效果：</strong></p>
+<p><img src="http://images0.cnblogs.com/blog2015/519052/201507/081142240964758.png" alt=""></p>
+<p><strong>自定义实现：</strong></p>
+<p>这个插件所有的核心就是上面提到的data数据，我们可以随意的定义UI，但是定义好之后需要对UI和data数据进行绑定，这个是最重要的环节，图中的文件列表右侧的start、cancle按钮都非常好实现，使用简单模型里面的例子既可以了，这里就不多介绍了。</p>
+<p>这里面最让人烦恼的就是上面那几个按钮，怎么绑定到所有数据上呢？方法非常简单，就是你把每一个文件的data数据存储在一个地方（可以使用jQuery.data()），在点击上面按钮的时候，查找符合要求的文件列表，读取data信息，调用data.submit…等方法就可以了，SoEasy！</p>
+<p><strong>结论</strong><br>data这个数据对象非常重要，用data能实现你想要的自定义功能。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">HTTP</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">前端</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">jquery插件</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/07/08/dev-2015-07-08-jquery-file-upload/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/01/10/dev-2016-01-10-maven-pom/" class="archive-article-date">
-  	<time datetime="2016-01-10T00:33:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-01-10</time>
-</a>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/10/dev-2016-01-10-maven-pom/">Maven POM详解</a>
-    </h1>
-  
+        
+        
+    </div>
+</aside>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">后端</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">maven</a>
-        		</li>
-      		
-		</ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
+
   
   
-    </div></section>
+    <nav id="page-nav">
+      <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    </nav>
   
-
-    
 
 
           </div>
@@ -267,9 +286,9 @@ var _hmt = _hmt || [];
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: false,
+		isHome: true,
 		isPost: false,
-		isArchive: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

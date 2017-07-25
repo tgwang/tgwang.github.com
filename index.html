@@ -148,6 +148,120 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-dev-2017-07-25-java-lambda" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/25/dev-2017-07-25-java-lambda/">Java8学习之lambda表达式（一）</a>
+    </h1>
+  
+
+        
+        <a href="/2017/07/25/dev-2017-07-25-java-lambda/" class="archive-article-date">
+  	<time datetime="2017-07-25T13:13:27.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="lambda表达式的使用"><a href="#lambda表达式的使用" class="headerlink" title="lambda表达式的使用"></a>lambda表达式的使用</h2><h3 id="目的"><a href="#目的" class="headerlink" title="目的"></a>目的</h3><ul>
+<li>增加代码可读性</li>
+<li>简化编码</li>
+</ul>
+<h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><ul>
+<li>语法形式：<code>parameter -&gt; expression body</code></li>
+<li>语法组成：<code>参数列表 + 箭头[-&gt;] + 表达式体</code>，如：<code>(int x, int y) -&gt; x + y</code>或<code>(x, y) -&gt; x + y</code></li>
+</ul>
+<h3 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h3><ul>
+<li>类型声明：参数的类型可以不声明，编译器可以根据参数值推断出其类型。</li>
+<li>参数括号：单个参数的话，不需要使用圆括包裹参数。但多个参数或无参数必须要添加。</li>
+<li>表达式体花括号：如果表达式体只有一条语句，不需要用花括号包裹，如果是多条语句，必须使用花括号包裹。</li>
+<li>return关键字：如果表达式体只有一条语句，return关键字可以不写，编译器可以自动返回该值，如果写了return，则表达式体必须加上花括号。</li>
+</ul>
+<h3 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        MathInterface plus = (x, y) -&gt; x + y;</div><div class="line">        <span class="keyword">int</span> a = plus.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line"></div><div class="line">        System.out.println(plus.getClass().getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">MathInterface</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> m, <span class="keyword">int</span> n)</span></span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="深入了解lambda表达式"><a href="#深入了解lambda表达式" class="headerlink" title="深入了解lambda表达式"></a>深入了解lambda表达式</h2><h3 id="函数式接口"><a href="#函数式接口" class="headerlink" title="函数式接口"></a>函数式接口</h3><p>要了解 <strong>lambda表达式</strong>之前我们要先了解另外一个概念： <strong>函数式接口</strong>，此处我们只是简单的讲一下函数式接口，具体的信息我们会后面有机会单独讲。</p>
+<p>函数式接口是一个只有一个抽象方法的接口，这种类型的接口也称为 <strong>SAM接口</strong>，即<code>Single Abstract Method interfaces</code>。<br>根据上面的定义，我们提炼出两条函数式接口的规则：</p>
+<ul>
+<li>是一个接口</li>
+<li>只有一个抽象方法</li>
+</ul>
+<p>Java8引入了一个新注解<code>@FunctionalInterface</code>，用来标识函数式接口。但是如果某个接口没有此注解，然而却满足函数式接口的规则，那么这个接口也是函数式接口，这个和<code>@Override</code>非常相似。也就是说这个注解主要用于编译级错误检查，当你编写的接口不符合函数式接口定义的时候，编译器会报错。</p>
+<h3 id="lambda表达式与函数式接口的关系"><a href="#lambda表达式与函数式接口的关系" class="headerlink" title="lambda表达式与函数式接口的关系"></a>lambda表达式与函数式接口的关系</h3><p>lambda表达式是函数式接口的匿名实现。</p>
+<p>实现函数式接口可以有多种形式：</p>
+<ul>
+<li>普通类实现</li>
+<li>匿名类实现</li>
+<li>lambda表达式实现</li>
+</ul>
+<p>普通类实现经常见到，此处不过多讲解。此处重点讲解一下匿名类实现和lambda表达式实现，示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="comment">// 方式一：匿名类</span></div><div class="line">        MathInterface plus1 = <span class="keyword">new</span> MathInterface() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> m, <span class="keyword">int</span> n)</span> </span>&#123;</div><div class="line">                <span class="keyword">return</span> m + n;</div><div class="line">            &#125;</div><div class="line">        &#125;;</div><div class="line">        <span class="keyword">int</span> a = plus1.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line">        System.out.println(<span class="string">"class: "</span> + a);</div><div class="line"></div><div class="line">        <span class="comment">// 方式二：lambda表达式</span></div><div class="line">        MathInterface plus = (x, y) -&gt; x + y;</div><div class="line">        <span class="keyword">int</span> b = plus.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line">        System.out.println(<span class="string">"lambda: "</span> + b);</div><div class="line"></div><div class="line">        System.out.println(plus.getClass().getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">MathInterface</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> m, <span class="keyword">int</span> n)</span></span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">class: 9</div><div class="line">lambda: 9</div><div class="line">com.yunyear.demo.java8.lambda.Main$$Lambda$1/1543727556</div></pre></td></tr></table></figure></p>
+<p>有很多技术博客把lambda表达式成称为匿名类的语法糖，但是根据编译后生成的class文件和对字节码分析发现，两个的实现方式是不同的。后面会重点分析lambda表达式的字节码分析。</p>
+<p>匿名类代码及编译后生成的文件：<br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvn6hfqj20cr098aa7.jpg" alt="匿名类源代码"><br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvmg4yxj20ec00vq2p.jpg" alt="匿名类字节码文件"></p>
+<p>lambda表达式代码及编译后生成的代码：<br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvord68j20aw07g74b.jpg" alt="lambda表达式源代码"><br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvnodsfj20d000pgld.jpg" alt="lambda表达式字节码文件"></p>
+<p>可以看到：<br>匿名类实现的代码会在编译时编译成内部类字节码，而lambda表达式实现的代码在编译后没有内部类字节码，这是因为lambda表达式实现的代码是在运行时动态生成内部类的，这个与编译时生成内部类的实现方式是不同的。</p>
+<p>下一节我们将深入研究lambda表达式生成的字节码文件，了解lambda表达式的编译和执行机制，敬请期待。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">lambda表达式</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/07/25/dev-2017-07-25-java-lambda/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-med-2017-07-22-medical-in-future" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -967,11 +1081,11 @@ var _hmt = _hmt || [];
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
         		</li>
       		
 		</ul>
@@ -1146,118 +1260,10 @@ var _hmt = _hmt || [];
 
 
   
-    <article id="post-dev-2015-07-08-jquery-file-upload" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/07/08/dev-2015-07-08-jquery-file-upload/">浅谈异步上传插件 jquery-file-upload插件</a>
-    </h1>
-  
-
-        
-        <a href="/2015/07/08/dev-2015-07-08-jquery-file-upload/" class="archive-article-date">
-  	<time datetime="2015-07-08T13:24:46.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-07-08</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>当我们需要异步上传文件的时候，我们倾向于在网上查找相关的JQuery插件，jquery-file-upload就是我们经常看到的，但是他的主页是英文的，对于我们这些英语比较差的同学来说，简直就是。。。今天就来讲一下最简单的使用方法，如果有写的不好的地方还请拍砖。</p>
-<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p><a href="https://github.com/blueimp/jQuery-File-Upload/wiki" target="_blank" rel="external">jQuery File Upload</a>是一个非常优秀的上传组件，主要使用了XHR作为上传方式，并且利用了相当多的现代浏览器功能，所以可以实现诸如批量上传、超大文件上传、图片预览、拖拽上传、上传进度显示、跨域上传等功能。</p>
-<p>他的功能非常强大，API也比较简单，如果能够熟练使用$.ajax的话，相信理解起来也不是多难的事，但是它的UI也会非常难用。个人建议，如果小的组件可以自己定义一套简单的UI，没必要使用那么复杂的东西。如果你一定要使用它的UI的话，建议你看一下<a href="http://avnpc.com/pages/single-file-upload-component-by-jquery-file-upload" target="_blank" rel="external">定制jQuery File Upload为微博式单文件上传</a></p>
-<h2 id="jQuery-File-Upload的简化模型"><a href="#jQuery-File-Upload的简化模型" class="headerlink" title="jQuery File Upload的简化模型"></a>jQuery File Upload的简化模型</h2><p>jQuery File Upload包含了一堆文件，首先需要弄清楚的是最核心的部分是哪些，官网已经给出了最简单的模型<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Basic-plugin#how-to-use-only-the-basic-plugin-minimal-setup-guide" target="_blank" rel="external">基本功能</a>，一个最简单的jQuery File Upload上传组件，必须包括以下文件：</p>
-<ul>
-<li>jQuery库，建议jQuery 1.8以上版本</li>
-<li>js/vendor/jquery.ui.widget.js ： jQuery UI Widget</li>
-<li>js/jquery.iframe-transport.js ： 扩展iframe数据传输</li>
-<li>js/jquery.fileupload.js ： jQuery File Upload核心类</li>
-<li>js/cors/jquery.xdr-transport.js 在IE下应载入此文件解决跨域问题</li>
-</ul>
-<p>官网事例：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE HTML&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>jQuery File Upload Example<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">"fileupload"</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"files[]"</span> <span class="attr">data-url</span>=<span class="string">"server/php/"</span> <span class="attr">multiple</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/vendor/jquery.ui.widget.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.iframe-transport.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.fileupload.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="xml"></span></div><div class="line">$(function () &#123;</div><div class="line">    $('#fileupload').fileupload(&#123;</div><div class="line">        dataType: 'json',</div><div class="line">        done: function (e, data) &#123;</div><div class="line">            $.each(data.result.files, function (index, file) &#123;</div><div class="line">                $('<span class="tag">&lt;<span class="name">p</span>/&gt;</span>').text(file.name).appendTo(document.body);</div><div class="line">            &#125;);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&#125;);</div><div class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span> </div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
-<p>当我们需要点击按钮才能提交上传的时候，<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Basic-plugin#how-to-start-uploads-with-a-button-click" target="_blank" rel="external">按钮上传</a></p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">$(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">    $(<span class="string">'#fileupload'</span>).fileupload(&#123;</div><div class="line">        <span class="attr">dataType</span>: <span class="string">'json'</span>,</div><div class="line">        <span class="attr">add</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</div><div class="line">            data.context = $(<span class="string">'&lt;button/&gt;'</span>).text(<span class="string">'Upload'</span>)</div><div class="line">                .appendTo(<span class="built_in">document</span>.body)</div><div class="line">                .click(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">                    data.context = $(<span class="string">'&lt;p/&gt;'</span>).text(<span class="string">'Uploading...'</span>).replaceAll($(<span class="keyword">this</span>));</div><div class="line">                    data.submit();</div><div class="line">                &#125;);</div><div class="line">        &#125;,</div><div class="line">        <span class="attr">done</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</div><div class="line">            data.context.text(<span class="string">'Upload finished.'</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-<h2 id="浅谈设计原理"><a href="#浅谈设计原理" class="headerlink" title="浅谈设计原理"></a>浅谈设计原理</h2><ol>
-<li>当我们对某个file input标签执行 upload插件的初始化方法后，插件会监听这个file input的change事件</li>
-<li><p>当用户选择文件的时候，会触发change事件</p>
- <figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ($.support.fileInput) &#123;</div><div class="line">    <span class="keyword">this</span>._on(<span class="keyword">this</span>.options.fileInput, &#123;</div><div class="line">        <span class="attr">change</span>: <span class="keyword">this</span>._onChange</div><div class="line">    &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>在_onChange处理函数中，会遍历files，触发upload插件的change方法</p>
-</li>
-<li>当change函数返回true的时候，会触发upload插件的add方法</li>
-<li>在upload插件的回调函数中，会传入两个参数，fn(事件信息, 数据对象)，这个数据对象非常重要，我们几乎所有的操作都要使用到它</li>
-<li>在upload插件的add方法中可以执行我们的逻辑，例如我们想判断文件后缀是否满足条件，插件自带的参数 acceptFileTypes 在简化模型中不起作用，我们可以在change和add方法中判断，如果不满足返回false即可，如果通过可以直接执行data.submit()进行提交</li>
-<li>如果上传成功会执行done函数（响应成功），失败则会执行fail函数</li>
-<li>所有的回调函数的原理都是一样的，后面的大家自己研究</li>
-</ol>
-<h2 id="自定义UI"><a href="#自定义UI" class="headerlink" title="自定义UI"></a>自定义UI</h2><h3 id="聊聊官网自带UI"><a href="#聊聊官网自带UI" class="headerlink" title="聊聊官网自带UI"></a>聊聊官网自带UI</h3><p>自定义UI模版需要严格按照官网提供的模版进行操作，否则可能会出现各种问题，必要使用他的模版的原因是：ui的JS中操作Dom的逻辑都是固定的，如果你不按照这种格式的话，js查找不到相应的元素，不能获取相应的数据，包括上面提到的data数据。</p>
-<h3 id="探讨自定义UI"><a href="#探讨自定义UI" class="headerlink" title="探讨自定义UI"></a>探讨自定义UI</h3><p><strong>官网效果：</strong></p>
-<p><img src="http://images0.cnblogs.com/blog2015/519052/201507/081142240964758.png" alt=""></p>
-<p><strong>自定义实现：</strong></p>
-<p>这个插件所有的核心就是上面提到的data数据，我们可以随意的定义UI，但是定义好之后需要对UI和data数据进行绑定，这个是最重要的环节，图中的文件列表右侧的start、cancle按钮都非常好实现，使用简单模型里面的例子既可以了，这里就不多介绍了。</p>
-<p>这里面最让人烦恼的就是上面那几个按钮，怎么绑定到所有数据上呢？方法非常简单，就是你把每一个文件的data数据存储在一个地方（可以使用jQuery.data()），在点击上面按钮的时候，查找符合要求的文件列表，读取data信息，调用data.submit…等方法就可以了，SoEasy！</p>
-<p><strong>结论</strong><br>data这个数据对象非常重要，用data能实现你想要的自定义功能。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">前端</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">jquery插件</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/07/08/dev-2015-07-08-jquery-file-upload/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 
@@ -1352,6 +1358,18 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">angular</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">书写规范</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">gulp</a>
               </li>
              
@@ -1372,27 +1390,19 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">angular</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">书写规范</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
+                <a href="javascript:void(0)" class="js-tag color5">lambda表达式</a>
               </li>
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">医疗</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
               </li>
             
             <div class="clearfix"></div>
