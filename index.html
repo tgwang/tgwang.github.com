@@ -148,6 +148,276 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-dev-2017-08-13-lambda-translation" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/13/dev-2017-08-13-lambda-translation/">Java8学习之如何转换Lambda表达式</a>
+    </h1>
+  
+
+        
+        <a href="/2017/08/13/dev-2017-08-13-lambda-translation/" class="archive-article-date">
+  	<time datetime="2017-08-13T03:53:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>本篇文章是对<a href="http://cr.openjdk.java.net/~briangoetz/lambda/lambda-translation.html" target="_blank" rel="external">Translation of Lambda Expressions</a>的翻译，本文基本是逐句翻译，其中也加入了一些个人的理解，如有翻译不准确的地方请指正。</p>
+</blockquote>
+<h1 id="Java如何转换Lambda表达式"><a href="#Java如何转换Lambda表达式" class="headerlink" title="Java如何转换Lambda表达式"></a>Java如何转换Lambda表达式</h1><h2 id="关于本文档"><a href="#关于本文档" class="headerlink" title="关于本文档"></a>关于本文档</h2><p>本文档概述了将lambda表达式和方法引用从Java源代码转换为字节码的策略。Java的Lambda表达式由<a href="http://jcp.org/en/jsr/detail?id=335" target="_blank" rel="external">JSR 335</a>定义并在OpenJDK <a href="http://openjdk.java.net/projects/lambda/" target="_blank" rel="external">Lambda Project</a>中实现。语言特征的概述可以在<a href="http://cr.openjdk.java.net/~briangoetz/lambda/lambda-state-4.html" target="_blank" rel="external">State of the Lambda</a>中找到。</p>
+<p>本文档涉及当编译器遇到lambda表达式时如何法转换成字节码，以及语言运行时如何参与评估lambda表达式。本文档的大部分内容涉及函数式接口转换技术。</p>
+<p>函数式接口是lambda表达式的核心。函数式接口是只有一个抽象方法（原文是：non-Object method）的接口，例如：<code>Runnable</code>, <code>Comparator</code>等。（Java库已经使用这样的接口来表示回调很多年了）</p>
+<p>Lambda表达式只能分配给类型为函数式接口的变量。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Runnable r = () -&gt; &#123; System.out.println(<span class="string">"hello"</span>); &#125;;</div></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Collections.sort(strings, (String a, String b) -&gt; -(a.compareTo(b)));</div></pre></td></tr></table></figure>
+<p>编译器生成的用于捕获这些lambda表达式的代码取决于lambda表达式本身以及它所分配的函数式接口类型。</p>
+<h2 id="依赖与符号"><a href="#依赖与符号" class="headerlink" title="依赖与符号"></a>依赖与符号</h2><p>转换方案依赖于<a href="http://jcp.org/en/jsr/detail?id=292" target="_blank" rel="external">JSR 292</a>的几项功能，包括<code>invokedynamic</code>、方法句柄（<code>method handles</code>）和用于方法句柄（<code>method handles</code>）和方法类型（<code>method types</code>）增强的LDC【LoaD Constant】字节码表单。</p>
+<p>由于这些不能再Java源码中展示，我们的示例将使用这些功能的伪代码：</p>
+<ul>
+<li>方法句柄常量使用<code>MH([refKind] class-name.method-name)</code>表示</li>
+<li>方法类型常量使用<code>MT(method-signature)</code>表示</li>
+<li><code>invokedynamic</code>指令使用<code>INDY((bootstrap, static args...)(dynamic args...))</code>表示</li>
+</ul>
+<p>读者应该具备<a href="http://jcp.org/en/jsr/detail?id=292" target="_blank" rel="external">JSR 292</a>功能的知识。</p>
+<p>转换方案还采取正在由Java SE 8的JSR-292专家组指定的新功能：用于反射常量方法句柄的API。</p>
+<h2 id="转换策略"><a href="#转换策略" class="headerlink" title="转换策略"></a>转换策略</h2><p>我们可以通过多种方式在字节码中表示lambda表达式，例如内部类，方法句柄【<code>method handles</code>】，动态代理【<code>dynamic proxies</code>】等，每种方案都有利弊。在选择策略时，有两个竞争的目标：通过不提交特定策略来最大化未来优化的灵活性，同时也要在class文件中是稳定的结构。我们可以通过 JSR 292 中的<code>invokedynamic</code>实现这两个目标，用以将字节码中的lambda创建的二进制表示与在运行时评估lambda表达式的机制进行分离。而不是生成字节码来创建实现lambda表达式的对象（例如调用内部类的构造函数），我们描述了构建lambda的方法，并将实际的构造委托给语言运行时。这个方法就是在<code>invokedynamic</code>指令的静态和动态参数列表中进行编码。</p>
+<p>使用<code>invokedynamic</code>可以让我们将翻译策略延迟到运行时再进行选择，运行时实现可以动态地选择策略来评估lambda表达式，运行时实现选择隐藏在lambda构造的标准化（即：平台规范的一部分）API之后，使用静态编译器可以发出对该API的调用，并且JRE实现可以选择其首选实现策略。<code>invokedynamic</code>机制不会有后期绑定方法可能施加的性能成本。</p>
+<p>当编译器遇到lambda表达式时，它首先将lambda体降低（脱糖）为一个方法，其参数列表和返回类型与lambda表达式相匹配，此方法可能还会在lambda表达式被捕获的地方增加一些额外的参数（如果有的话，将会是从词法作用域捕获的值），他生成一个<code>invokedynamic</code>调用点，当调用点被调用时，将会返回一个函数式接口（这个函数式接口是lambda表达式将要转换的目标类型）的实例。这个调用点被称为给定lambda表达式的lambda工厂。lambda工厂的动态参数是从词法作用域中捕获的值。lambda工厂的引导方法是Java语言运行时库中的标准化方法，称为：<code>lambda metafactory</code>。静态引导参数在编译时捕获已知的关于lambda的信息（将要转换的函数式接口，lambda体脱糖后生成的方法句柄，SAM类型是否可序列化的信息等）</p>
+<p>方法引用的处理方式与lambda表达式相同，除了大多数方法引用不需要被脱糖为一个新方法，我们可以简单地加载引用方法的常量方法句柄，并将其传递给元素。</p>
+<h2 id="Lambda表达式脱糖"><a href="#Lambda表达式脱糖" class="headerlink" title="Lambda表达式脱糖"></a>Lambda表达式脱糖</h2><p>将lambda表达式翻译成字节码的第一步是将lambda表达式脱糖为一个方法。</p>
+<p>围绕脱糖操作我们必须做出几种选择：</p>
+<ul>
+<li>我们脱糖为静态方法还是实例方法？</li>
+<li>应该将方法脱糖到哪个类中？</li>
+<li>脱糖方法的访问性质是什么？</li>
+<li>脱糖方法的名称是什么？</li>
+<li>如果为了弥合lambda表达式签名和函数式接口方法签名之间的差异而做一些修改（如装箱，拆箱，原始拓宽或缩小转化，可变转换等），脱糖的方法应该遵循lambda体的签名，还是函数式接口方法的签名，还是两者之间的东西？谁负责所需的修改？</li>
+<li>如果lambda从闭包中捕获参数，那么在已脱糖的方法签名中应该如何表示参数呢？（它们可以是添加到参数列表的开始或结尾的单个参数，或者编译器可以将它们收集到单个“frame”参数中。）</li>
+</ul>
+<p>关于lambda体脱糖相关的问题是方法引用是否需要 <em>生成适配器</em> 或 <em>“桥”方法</em>。</p>
+<p>编译器将推测lambda表达式的方法签名，包括参数类型，返回类型和抛出的异常。我们称之为 <strong>自然签名</strong>【<code>natural signature</code>】，Lambda表达式也有一个目标类型，它是一个函数式接口。我们将把lambda描述符称为目标类型的擦除描述符的方法签名。从lambda工厂返回的值，它实现了函数式接口并捕获了lambda的行为，我们称之为lambda对象。</p>
+<p>其它条件相同的情况下，私人的方法比非私人的方法更好，静态方法优于实例方法，最好是将lambda体脱糖到lambda表达式出现的最内层的类中，签名应该与lambda体的签名相匹配，额外的参数应该放到被捕获的值的参数列表的前面，并且不会到方法引用进行脱糖。 然而，也有例外情况，我们可能不得不偏离此基准策略。</p>
+<h2 id="脱糖示例–“无状态”的lambda表达式"><a href="#脱糖示例–“无状态”的lambda表达式" class="headerlink" title="脱糖示例–“无状态”的lambda表达式"></a>脱糖示例–“无状态”的lambda表达式</h2><p>翻译lambda表达式的最简单的形式是从闭包作用域中不捕获任何状态：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;String&gt; list = ...</div><div class="line">        list.forEach( s -&gt; &#123; System.out.println(s); &#125; );</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>lambda表达式的自然签名是<code>(String)V</code>,<code>forEach</code>方法使用一个<code>Block&lt;String&gt;</code>，她的lambda描述符为<code>(Object)V</code>，编译器将lambda体脱糖成一个静态方法，该方法的签名是自然签名，并且为该方法生成一个名称。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;String&gt; list = ...</div><div class="line">        list.forEach( [lambda <span class="keyword">for</span> lambda$<span class="number">1</span> as Block] );</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="keyword">void</span> lambda$<span class="number">1</span>(String s) &#123;</div><div class="line">        System.out.println(s);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="脱糖示例–lambda表达式捕获不变的值"><a href="#脱糖示例–lambda表达式捕获不变的值" class="headerlink" title="脱糖示例–lambda表达式捕获不变的值"></a>脱糖示例–lambda表达式捕获不变的值</h2><p>lambda表达式的另一种形式涉及捕获闭包的<code>final</code>（或<code>有效final</code>）局部变量和/或闭包实例的字段（我们可以把它看作是闭包中对<code>final</code>类型的<code>this</code>引用的捕获）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;Person&gt; list = ...</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> bottom = ..., top = ...;</div><div class="line">        list.removeIf( p -&gt; (p.size &gt;= bottom &amp;&amp; p.size &lt;= top) );</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里，我们的lambda从闭包作用域中捕获<code>final</code>类型的局部变量<code>bottom</code>和<code>top</code>。</p>
+<p>已脱糖方法的签名将由自然签名<code>(Person)Z</code>和在参数列表前面的额外参数组成，编译器对于这些额外参数是如何表示的有一定的余地；他们可以被单独添加，也可以包装到一个<code>frame</code>类中，还可以包装到一个数组中。其中最简单的方式就是单独添加：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;Person&gt; list = ...</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> bottom = ..., top = ...;</div><div class="line">        list.removeIf( [ <span class="function">lambda <span class="keyword">for</span> lambda$1 as Predicate <span class="title">capturing</span> <span class="params">(bottom, top)</span> ])</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> lambda$<span class="number">1</span>(<span class="keyword">int</span> bottom, <span class="keyword">int</span> top, Person p) &#123;</div><div class="line">        <span class="keyword">return</span> (p.size &gt;= bottom &amp;&amp; p.size &lt;= top;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>或者，捕获的值（<code>bottom</code> 和 <code>top</code>）可以被包装在一个<code>frame</code>类或一个数组中；其中最关键是已脱糖的lambda方法的签名中出现的额外参数的类型和它们作为lambda工厂的（动态）参数的类型的一致性。由于编译器控制了这两个，并且它们同时生成，因此编译器在捕获参数的打包方式上有一定的灵活性。</p>
+<h2 id="Lambda-Metafactory"><a href="#Lambda-Metafactory" class="headerlink" title="Lambda Metafactory"></a>Lambda Metafactory</h2><p>Lambda的捕获将由<code>invokedynamic</code>调用点实现，其静态参数描述了lambda体和lambda描述符的特征，其动态参数（如果有的话）是捕获的值。当被调用时，此调用站点返回对应的lambda体和描述符的lambda对象，并绑定到捕获的值。这个调用点的引导方法是一个指定的平台方法，称为<code>metafactory</code>。（我们可以为所有lambda形式提供一个单一的<code>metafactory</code>，或者为常见情况提供专门的版本。）虚拟机对于每个捕获的点只调用一次<code>metafactory</code>；此后，它将绕开<code>metafactory</code>直接链接到调用点。调用点是惰性进行链接的，因此未调用的工厂站点将不会进行链接。基础的metafactory的静态参数列表如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">metaFactory(MethodHandles.Lookup caller, <span class="comment">// provided by VM</span></div><div class="line">            String invokedName,          <span class="comment">// provided by VM</span></div><div class="line">            MethodType invokedType,      <span class="comment">// provided by VM</span></div><div class="line">            MethodHandle descriptor,     <span class="comment">// lambda descriptor</span></div><div class="line">            MethodHandle impl)           <span class="comment">// lambda body</span></div></pre></td></tr></table></figure>
+<p>前三个参数（caller，invokedName，invokedType）由VM在调用站点链接时自动赋值。</p>
+<p><code>descriptor</code>参数标识lambda表达式将要转换的函数式接口方法。（通过方法句柄的反射API，<code>metafactory</code>可以获取函数式接口类的名称及其主要方法的名称和方法签名。）</p>
+<p><code>impl</code>参数标识lambda方法，是一个已脱糖的lambda体或者是方法引用中已命名的方法。</p>
+<p>函数式接口方法与实现方法的方法签名可能存在一些差异。实现方法可能具有与捕获的参数相对应的额外参数。其余的参数也可能不能完全匹配；在适配过程中允许进行某些适配（如：子类型、装箱操作）。</p>
+<h2 id="Lambda-捕获"><a href="#Lambda-捕获" class="headerlink" title="Lambda 捕获"></a>Lambda 捕获</h2><p>我们现在准备描述lambda表达式和方法引用的函数式接口转换的翻译过程。我们可以将例子A翻译成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">            List&lt;String&gt; list = ...</div><div class="line">            list.forEach(indy((MH(metaFactory), MH(invokeVirtual Block.apply),</div><div class="line">                               MH(invokeStatic A.lambda$<span class="number">1</span>)( )));</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> lambda$<span class="number">1</span>(String s) &#123;</div><div class="line">        System.out.println(s);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于在A中，lambda表达式是无状态的，lambda工厂函数的动态参数为空。</p>
+<p>例如B，动态参数列表不为空，因此我们必须向lambda工厂函数提供bottom和top的值。</p>
+<h2 id="静态-VS-实例-方法"><a href="#静态-VS-实例-方法" class="headerlink" title="静态 VS 实例 方法"></a>静态 VS 实例 方法</h2><p>像上面讨论的Lambda表达式可以转换为静态方法，因为它们不以任何方式使用闭包的对象实例（没有引用<code>this</code>，<code>super</code>或闭包实例的成员）。总的来说。我们将引用<code>this</code>，<code>super</code>或闭包实例的成员的lambda表达式作为<em>实例捕获【<code>instance-capturing</code>】</em>的lambda表达式。</p>
+<p><strong><em>非实例捕获</em>的lambda表达式被转换成私有、静态方法（<code>private</code>，<code>static</code>），<em>实例捕获</em>的lambda表达式转换成私用实例方法</strong>。这简化了<em>实例捕获</em>的lambdas的脱糖过程，因为lambda体中的名称将意味着与已脱糖的方法中的名称相同，并且与可用的实现技术（绑定方法句柄）很好地关联。当捕获<em>实例捕获</em>的lambda时，接收器（this）被指定为第一个动态参数。</p>
+<p>我们研究一个捕获字段<code>minSize</code>的lambda表达式的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">list.filter(e -&gt; e.getSize() &lt; minSize )</div></pre></td></tr></table></figure>
+<p>我们将这和脱糖称为实例方法，并将接收者作为第一个捕获的参数传递：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">list.forEach(INDY((MH(metaFactory), MH(invokeVirtual Predicate.apply),</div><div class="line">                   MH(invokeVirtual B.lambda$<span class="number">1</span>))( <span class="keyword">this</span> ))));</div><div class="line"></div><div class="line"><span class="keyword">private</span> <span class="keyword">boolean</span> lambda$<span class="number">1</span>(Element e) &#123;</div><div class="line">    <span class="keyword">return</span> e.getSize() &lt; minSize;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于lambda体北翻译成为私用方法，当将<em>行为方法句柄</em>传递给<code>metafactory</code>时，捕获站点应该加载一个常量方法句柄，其引用类型为：对于实例方法为<code>REF_invokeSpecial</code>，对静态方法为<code>REF_invokeStatic</code>。</p>
+<p>我们能够脱糖为私有方法是因为捕获类可以访问私有方法，因此可以获得一个私有方法的可以被<code>metafactory</code>调用的方法句柄。（如果<code>metafactory</code>是通过生成字节码的形式实现目标的函数式接口，而不是直接调用方法句柄，它将通过<code>Unsafe.defineClass</code>加载这些类，<code>Unsafe.defineClass</code>不受可访问性检查的影响。）</p>
+<h2 id="方法引用捕获"><a href="#方法引用捕获" class="headerlink" title="方法引用捕获"></a>方法引用捕获</h2><p>有多种形式的方法引用，像lambdas一样，可以分为<em>实例捕获</em>和<em>非实例捕获</em>。非实例捕获方法引用包括静态方法引用（<code>Integer::parseInt</code>，以引用类型<code>invokeStatic</code>捕获），不受约束的方法实例引用（<code>String::length</code>，以引用类型<code>invokeVirtual</code>捕获），和顶级构造函数引用（<code>Foo::new</code>，以引用类型<code>invoke_newSpecial</code>捕获），捕获<em>非实例捕获</em>方法引用时，捕获的参数列表始终为空：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">list.filter(String::isEmpty)</div></pre></td></tr></table></figure>
+<p>被翻译成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">list.filter(indy(MH(metaFactory), MH(invokeVirtual Predicate.apply),</div><div class="line">                 MH(invokeVirtual String.isEmpty))()))</div></pre></td></tr></table></figure>
+<p><em>实例捕获</em>方法引用形式包括绑定实例方法引用（<code>s::length</code>，以引用类型<code>invokeVirtual</code>捕获），<code>super</code>方法引用（<code>super::foo</code>，以引用类型<code>invokeSpecial</code>捕获），和内部类构造器引用（<code>Inner::new</code>，以引用类型<code>invokeNewSpecial</code>捕获）。捕获<em>实例捕获</em>方法引用时，捕获的参数列表总是具有单个参数，这个参数在超类或内部类构造方法引用的情况下是<code>this</code>，在绑定实例方法引用的情况下是<strong>指定的接收者</strong></p>
+<h2 id="可变参数"><a href="#可变参数" class="headerlink" title="可变参数"></a>可变参数</h2><p>如果将可变参数方法的方法引用转换为不是可变参数方法的函数式接口，编译器必须生成一个<strong>桥接方法</strong>并捕获<strong>桥接方法</strong>的句柄，而不是目标方法本身。<strong>桥接方法</strong>必须处理任何需要修改的参数类型，以及可变参数转换为非可变参数的操作。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IIS</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">void</span> <span class="title">foo</span><span class="params">(Integer a1, Integer a2, String a3)</span></span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">m</span><span class="params">(Number a1, Object... rest)</span> </span>&#123; ... &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">void</span> <span class="title">bar</span><span class="params">()</span> </span>&#123;</div><div class="line">        SIS x = Foo::m;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在这里，编译器需要生成一个<em>桥</em>，将第一个参数的类型从<code>Number</code>调整为<code>Integer</code>，并将其余的参数放到一个<code>Object</code>数组中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">void</span> <span class="title">bar</span><span class="params">()</span> </span>&#123;</div><div class="line">        SIS x = indy((MH(metafactory), MH(invokeVirtual IIS.foo),</div><div class="line">                      MH(invokeStatic m$bridge))( ))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="keyword">private</span> <span class="keyword">void</span> m$bridge(Integer a1, Integer a2, String a3) &#123;</div><div class="line">        Foo.m(a1, a2, a3);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h2><p>已脱糖的lambda方法有一个参数列表和一个返回类型：<code>(A1..An) -&gt; Ra</code>（如果已脱糖的方法是实例方法，则接收者被认为是第一个参数），函数式接口同样也有一个参数列表和返回类型：<code>(F1..Fm) -&gt; Rf</code>（没有接收者参数）。工厂方法的动态参数具有参数类型<code>(D1..Dk)</code>。如果lambda表达式是<em>实例捕获</em>类型，第一个动态参数一定是接收者。</p>
+<p>这些长度相加必须如下：<code>k+m == n</code>。也就是说，lambda体参数列表应该与动态参数列表和函数式接口方法参数列表的组合一样长。</p>
+<p>我们将lambda体的参数列表<code>A1..An</code>分成<code>(D1..Dk H1..Hm)</code>，其中<code>D</code>参数与“额外的”（动态）参数相对应，<code>H</code>参数与函数式接口参数相对应。</p>
+<p>我们需要将<code>Hi</code>修改为<code>Fi</code>（<code>i</code>为<code>1..m</code>中的一个序号），同样的，我们也需要将<code>Ra</code>修改为<code>Rf</code>。如果有以下情况，<code>T</code>类型修改为<code>U</code>类型：</p>
+<ul>
+<li><code>T == U</code></li>
+<li><code>T</code>是原始类型，<code>U</code>是引用类型，<code>T</code>可以通过装箱操作转换为<code>U</code></li>
+<li><code>T</code>是引用类型，<code>U</code>是原始类型，<code>T</code>可以通过拆箱操作转换为<code>U</code></li>
+<li><code>T</code>和<code>U</code>是原始类型，<code>T</code>可以通过<em>原始加宽转换</em>操作转换为<code>U</code></li>
+<li><code>T</code>和<code>U</code>是引用类型，<code>T</code>可以转换为<code>U</code></li>
+</ul>
+<p><code>metafactory</code>在<strong>连接阶段</strong>对修改进行验证，并在<strong>捕获阶段</strong>执行。</p>
+<h2 id="Metafactory-变种"><a href="#Metafactory-变种" class="headerlink" title="Metafactory 变种"></a>Metafactory 变种</h2><p>对于所有的lambda形式都有一个单一的<code>metafactory</code>是很实用的，然而，将<code>metafactory</code>分成多个版本似乎更为可取：</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">lambda表达式</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/08/13/dev-2017-08-13-lambda-translation/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-dev-2017-07-30-java-lambda-code" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/30/dev-2017-07-30-java-lambda-code/">dev-2017-07-30-java-lambda-code</a>
+    </h1>
+  
+
+        
+        <a href="/2017/07/30/dev-2017-07-30-java-lambda-code/" class="archive-article-date">
+  	<time datetime="2017-07-30T00:53:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-07-30</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>上一节我们讲述了lambda表达式的基本知识，这一节我们从反编译和JVM源代码角度来分析一下lambda表达式的执行机制。</p>
+<p>我们先使用反编译软件进行反编译，对比使用Java8版本模式和使用Java7或更早的版本模式反编译之后的代码的不同，初步了解lambda表达式的执行机制。<br>再从JVM源代码角度进行深入研究，看一下编译器如何编译lambda表达式以及JVM是如何解析lambda表达式的。</p>
+<h2 id="反编译"><a href="#反编译" class="headerlink" title="反编译"></a>反编译</h2><p>目前，经典的 <a href="&quot;http://jd.benow.ca/&quot; JD-GUI">JD-GUI</a> 不支持对Java8的class文件的反编译操作，所以我们使用 <a href="&quot;http://www.benf.org/other/cfr/&quot; CFR">CFR</a> 对Java8的class文件进行反编译，目前CFR的版本文件为：<code>cfr_0_122.jar</code>。</p>
+<h3 id="执行方式"><a href="#执行方式" class="headerlink" title="执行方式"></a>执行方式</h3><p><code>CFR</code>的执行方式如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java --jar cfr_0_122.jar class_or_jar_file [method] [options]</div></pre></td></tr></table></figure>
+<p>查看参数命令: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java --jar cfr_0_122.jar --<span class="built_in">help</span></div></pre></td></tr></table></figure>
+<h3 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h3><p>我们写一个简单的示例，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LambdaMain</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        <span class="comment">// 方式二：lambda表达式</span></div><div class="line">        MathInterface plus = (x, y) -&gt; x + y;</div><div class="line">        <span class="keyword">int</span> b = plus.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line">        System.out.println(<span class="string">"lambda: "</span> + b);</div><div class="line"></div><div class="line">        System.out.println(plus.getClass().getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="class"><span class="keyword">interface</span> <span class="title">MathInterface</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> m, <span class="keyword">int</span> n)</span></span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>运行结果：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">lambda: 9</div><div class="line">com.yunyear.demo.java8.lambda.LambdaMain$$Lambda$1/1078694789</div></pre></td></tr></table></figure>
+<p><strong>使用Java8版本模式反编译:</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar .\cfr_0_122.jar E:\WorkSpace\Java\java8-demo\target\classes\com\yunyear\demo\java8\lambda\LambdaMain.class</div></pre></td></tr></table></figure>
+<p>反编译结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line"> * Decompiled with CFR 0_122.</div><div class="line"> */</div><div class="line"><span class="keyword">package</span> com.yunyear.demo.java8.lambda;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.PrintStream;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LambdaMain</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        MathInterface plus = (x, y) -&gt; x + y;</div><div class="line">        <span class="keyword">int</span> b = plus.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line">        System.out.println(<span class="string">"lambda: "</span> + b);</div><div class="line">        System.out.println(plus.getClass().getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">interface</span> <span class="title">MathInterface</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> var1, <span class="keyword">int</span> var2)</span></span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个和我们编写的代码没有什么区别。</p>
+<p><strong>使用Java7或更早的版本模式反编译:</strong><br>使用Java7或更早的版本模式编译class文件，只需要增加反编译参数<code>--decodelambdas false</code>即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -jar .\cfr_0_122.jar E:\WorkSpace\Java\java8-demo\target\classes\com\yunyear\demo\java8\lambda\LambdaMain.class --decodelambdas <span class="literal">false</span></div></pre></td></tr></table></figure>
+<p>反编译结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/*</span></div><div class="line"> * Decompiled with CFR 0_122.</div><div class="line"> */</div><div class="line"><span class="keyword">package</span> com.yunyear.demo.java8.lambda;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.PrintStream;</div><div class="line"><span class="keyword">import</span> java.lang.invoke.LambdaMetafactory;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LambdaMain</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        MathInterface plus = (MathInterface)LambdaMetafactory.metafactory(<span class="keyword">null</span>, <span class="keyword">null</span>, <span class="keyword">null</span>, (II)I, lambda$main$<span class="number">0</span>(<span class="keyword">int</span> <span class="keyword">int</span> ), (II)I)();</div><div class="line">        <span class="keyword">int</span> b = plus.operation(<span class="number">4</span>, <span class="number">5</span>);</div><div class="line">        System.out.println(<span class="string">"lambda: "</span> + b);</div><div class="line">        System.out.println(plus.getClass().getName());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="comment">/* synthetic */</span> <span class="keyword">int</span> lambda$main$<span class="number">0</span>(<span class="keyword">int</span> x, <span class="keyword">int</span> y) &#123;</div><div class="line">        <span class="keyword">return</span> x + y;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">interface</span> <span class="title">MathInterface</span> </span>&#123;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">operation</span><span class="params">(<span class="keyword">int</span> var1, <span class="keyword">int</span> var2)</span></span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个反编译的代码和我们编写的差别很大，从上面的代码中能够看到：</p>
+<ul>
+<li>反编译代码生成了一个<code>lambda$main$0</code>的方法</li>
+<li>反编译代码使用<code>LambdaMetafactory.metafactory</code>函数生成了一个接口实例，再结合输出结果，可以发现：<code>LambdaMetafactory.metafactory</code>自动生成匿名类并实例化。</li>
+<li>结合上一节中提到的<code>lambda表达式实现的代码在编译后没有内部类字节码文件</code>分析能够得出：<code>lambda表达式实现的代码是在运行时动态生成内部类的</code></li>
+</ul>
+<p>当我们看到Java7反编译的代码时，我们可能会有一个疑惑：为什么会如此反编译呢，他的底层又是如何处理的呢？如果想要彻底弄清楚这个问题，需要看字节码文件，看lambda表达式在字节码里是如何处理的，主要涉及到<code>invokedynamic</code>指令，可以参考<a href="http://blog.csdn.net/zxhoo/article/details/38387141" target="_blank" rel="external">Java8学习笔记（2） – InvokeDynamic指令</a>进行理解，本篇文章对此不进行深入探讨。</p>
+<p>接下来我们主要从JVM层面进行分析，根据上面的描述，我们知道此处的<code>LambdaMetafactory.metafactory</code>很关键，我们将以<code>LambdaMetafactory.metafactory</code>为入口，对源码进行分析。</p>
+<h2 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h2><p>我们找到<code>rt.jar</code>包中的<code>java.lang.invoke.LambdaMetafactory</code>类，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> CallSite <span class="title">metafactory</span><span class="params">(MethodHandles.Lookup caller,</span></span></div><div class="line">                                       String invokedName,</div><div class="line">                                       MethodType invokedType,</div><div class="line">                                       MethodType samMethodType,</div><div class="line">                                       MethodHandle implMethod,</div><div class="line">                                       MethodType instantiatedMethodType)</div><div class="line">            <span class="keyword">throws</span> LambdaConversionException &#123;</div><div class="line">        AbstractValidatingLambdaMetafactory mf;</div><div class="line">        mf = <span class="keyword">new</span> InnerClassLambdaMetafactory(caller, invokedType,</div><div class="line">                                             invokedName, samMethodType,</div><div class="line">                                             implMethod, instantiatedMethodType,</div><div class="line">                                             <span class="keyword">false</span>, EMPTY_CLASS_ARRAY, EMPTY_MT_ARRAY);</div><div class="line">        mf.validateMetafactoryArgs();</div><div class="line">        <span class="keyword">return</span> mf.buildCallSite();</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">lambda表达式</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/07/30/dev-2017-07-30-java-lambda-code/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-dev-2017-07-25-java-lambda" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -204,7 +474,7 @@ var _hmt = _hmt || [];
 <p>匿名类代码及编译后生成的文件：<br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvn6hfqj20cr098aa7.jpg" alt="匿名类源代码"><br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvmg4yxj20ec00vq2p.jpg" alt="匿名类字节码文件"></p>
 <p>lambda表达式代码及编译后生成的代码：<br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvord68j20aw07g74b.jpg" alt="lambda表达式源代码"><br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvnodsfj20d000pgld.jpg" alt="lambda表达式字节码文件"></p>
 <p>可以看到：<br>匿名类实现的代码会在编译时编译成内部类字节码，而lambda表达式实现的代码在编译后没有内部类字节码，这是因为lambda表达式实现的代码是在运行时动态生成内部类的，这个与编译时生成内部类的实现方式是不同的。</p>
-<p>下一节我们将深入研究lambda表达式生成的字节码文件，了解lambda表达式的编译和执行机制，敬请期待。</p>
+<p>下一节我们将深入研究lambda表达式相关的源码，了解lambda表达式的编译和执行机制，敬请期待。</p>
 
       
 
@@ -757,11 +1027,11 @@ var _hmt = _hmt || [];
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">后端</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">java</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">后端</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
@@ -974,11 +1244,11 @@ var _hmt = _hmt || [];
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">gulp</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">gulp</a>
         		</li>
       		
 		</ul>
@@ -989,248 +1259,6 @@ var _hmt = _hmt || [];
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2015/09/28/dev-2015-09-28-gulp-project/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-dev-2015-09-22-angular-project" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/09/22/dev-2015-09-22-angular-project/">AngularJS 项目开发实战</a>
-    </h1>
-  
-
-        
-        <a href="/2015/09/22/dev-2015-09-22-angular-project/" class="archive-article-date">
-  	<time datetime="2015-09-22T11:38:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-22</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><blockquote>
-<ol>
-<li>啰嗦一下</li>
-<li>你问我答</li>
-<li>目录结构</li>
-<li>压缩</li>
-<li>其他</li>
-</ol>
-</blockquote>
-<h2 id="啰嗦一下"><a href="#啰嗦一下" class="headerlink" title="啰嗦一下"></a>啰嗦一下</h2><p>最近在开发一个项目时，调研了一下AngularJS，发现这个框架功能很丰富，而且用起来也很方便，所以深入了解了一下，在此分享一下我的感悟。</p>
-<p>AngularJS是一个MVVM框架，所谓MVVM框架，即：Model-View-ViewModel，通俗一点的解释是：当数据发生变化时，框架自动进行数据绑定，自动更新页面上的数据。</p>
-<p>这一点可以说是非常“神奇”的功能，可以减少我们很多的工作量。把我们从复杂的DOM结构中解脱出来，用剩余的时间去干一点有用的事情。</p>
-<p>试想一下，当你和女神谈天说地，聊得不亦乐乎的时候，你突然发现自己的操作DOM的代码有点问题，改来改去改了好久才把问题解决掉，再回头和女神聊天，发现女神的笑容依旧那么美丽，但确是和隔壁使用AngularJS框架的王哥，这是多么悲伤场景啊！也许就在你修改代码期间，一段美好的姻缘就随风消逝了。这不能说是你们没有缘分，而是你选错了框架啊！</p>
-<p>说了很多AngularJS的好话，也要澄清一点，没有东西是完美的，AngularJS也有一些缺点，比如说，AngularJS自身框架的一些bug，不适合界面频繁交互的场景（如：游戏类网站）等，好在现在的网站大部分都是CRUD型的应用，你可以放心用了。</p>
-<p>下面我们就正式介绍一下AngularJS的相关知识点以及在项目中的应用，先进入到你问我答环节，看看群众们有哪些疑惑。</p>
-<h2 id="你问我答"><a href="#你问我答" class="headerlink" title="你问我答"></a>你问我答</h2><p><strong>问：</strong> AngularJS 适合构建什么类型的应用？<br><strong>答：</strong> AngularJS 适合做单页面应用程序（SPA应用），但是需要注意的是，并不是一个项目只能有一个页面应用，例如：做管理系统时，你可能需要为三种不同的账户提供三种不同的页面入口，master、guest、friend，你可以创建三个页面入口，每个页面是一个应用，并提供相应的页面入口即可。</p>
-<p><strong>问：</strong> 我以前做前端时，都是使用JQuery开发的，他们有什么区别吗？<br><strong>答：</strong> 有本质的区别，推荐你看一篇文章 <a href="http://blog.jobbole.com/76265/" title="jQuery开发者眼中的AngularJS" target="_blank" rel="external">jQuery开发者眼中的AngularJS</a></p>
-<p><strong>问：</strong> AngularJS不能做游戏网站，但是Jquery可以啊，这么说来AngularJS没JQuery好用啊？<br><strong>答：</strong> 如果你要是做游戏网站的话，你确实需要使用偏底层的JQuery，但是却不能说哪个好不好用，场景不同，需求也就不同，使用的技术也不同。</p>
-<p><strong>问：</strong> 如果用了AngularJS，我之前使用的JQuery或JS插件是不是就不能用了啊？<br><strong>答：</strong> 是的，他们不能同时使用，有一些JS插件通过修改可以在AngularJS中使用，如滑动插件iScroll，但是大多数插件都不行，如果你想实现一些效果，可以在网上找一找AngularJS的插件，很多插件都有相应的AngularJS实现，或者是兼容AngularJS的方法。</p>
-<p><em>其他问题后期再收集整理</em>，看一下项目规划的目录结构把！</p>
-<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">|-css</div><div class="line">|-js</div><div class="line">    |-controllers</div><div class="line">        |-index</div><div class="line">            |-a.controller.js</div><div class="line">            |-b.controller.js</div><div class="line">        |--demo</div><div class="line">    |-directives</div><div class="line">    |-filters</div><div class="line">    |-services</div><div class="line">    |-main.config.js</div><div class="line">    |-main.route.js</div><div class="line">|-templates</div><div class="line">|-libs</div></pre></td></tr></table></figure>
-<p>目录结构大概就是这样的，过滤器放在filters中，指令放在directives中，服务放在services中，main.config.js创建本服务的module和监控路由变化的事件等,<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">angular.module(<span class="string">'moduleApp'</span>, [<span class="string">"ngRoute"</span>, <span class="string">"ngTouch"</span>, <span class="string">"ngAnimate"</span>]);</div></pre></td></tr></table></figure></p>
-<p>main.route.js中配置路由信息，如：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">function</span> <span class="title">Route</span>(<span class="params">$routeProvider</span>) </span>&#123;</div><div class="line">    $routeProvider.when(<span class="string">'/demo'</span>, &#123;</div><div class="line">        <span class="attr">templateUrl</span>: <span class="string">'a.html'</span></div><div class="line">    &#125;).otherwise(&#123;</div><div class="line">        <span class="attr">redirectTo</span>: <span class="string">'/index'</span></div><div class="line">    &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>控制器放在controllers中,在controllers中需要分成具体的功能，这样防止在一个controllers有很多个js文件。</p>
-<h2 id="压缩"><a href="#压缩" class="headerlink" title="压缩"></a>压缩</h2><p>当开发完项目时，你会发现，里面有好多个JS文件，每个文件的大小都不大，但是对于前端来说，会发起很多请求，影响性能，所以我们要对文件进行压缩，可以使用gulp压缩，具体的压缩方法可以自己在网上查找，有很多文档可以查找，压缩后最常出现的问题是找不到所对应的依赖，AngularJS是通过参数名称注入的，如果不手动添加依赖，压缩之后就找不到对应的以来名称，如果你按照我前一段时间发的规范<a href="http://www.cnblogs.com/tgwang/p/4704589.html" title="Angularjs书写规范" target="_blank" rel="external">Angularjs书写规范</a>开发的话,压缩不会有什么问题。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">手动添加依赖</div><div class="line">angular</div><div class="line">    .module(<span class="string">'app'</span>)</div><div class="line">    .controller(<span class="string">'Dashboard'</span>, Dashboard);</div><div class="line"></div><div class="line">Dashboard.$inject = [<span class="string">'$location'</span>, <span class="string">'$routeParams'</span>, <span class="string">'common'</span>, <span class="string">'dataservice'</span>];</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Dashboard</span>(<span class="params">$location, $routeParams, common, dataservice</span>) </span>&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>一个项目中会遇到很多问题，只有自己一点点去尝试，过一段时间会把项目中遇到的问题及解决办法整理一下，供大家参考。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">前端</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/09/22/dev-2015-09-22-angular-project/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-dev-2015-08-05-angular-writing-standard" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2015/08/05/dev-2015-08-05-angular-writing-standard/">Angularjs书写规范</a>
-    </h1>
-  
-
-        
-        <a href="/2015/08/05/dev-2015-08-05-angular-writing-standard/" class="archive-article-date">
-  	<time datetime="2015-08-05T06:35:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-08-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="文件命名原则"><a href="#文件命名原则" class="headerlink" title="文件命名原则:"></a>文件命名原则:</h2><ol>
-<li>遵循以描述组件功能，然后是类型（可选）的方式来给所有的组件提供统一的命名<ul>
-<li>命名：feature.type.js。</li>
-<li>测试文件名（feature.type.spec.js）</li>
-</ul>
-</li>
-<li>大多数文件都有2个名字：<ul>
-<li>文件名 (avengers.controller.js)</li>
-<li>带有Angular的注册组件名 (AvengersController)</li>
-<li>测试文件名（avengers.controller.spec.js）</li>
-</ul>
-</li>
-</ol>
-<h2 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h2><ol>
-<li>一个文件只定义一个组件</li>
-<li>每一个文件都需要使用JavaScript闭包</li>
-<li>使用module的时候，避免直接用一个变量，而是使用getter的链式语法。<ul>
-<li>设置module，<code>angular.module(&#39;app&#39;, []);</code>。</li>
-<li>获取module，<code>angular.module(&#39;app&#39;);</code>。 </li>
-</ul>
-</li>
-<li><p><span>回调函数使用命名函数，不要用匿名函数</span></p>
- <figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// logger.js</span></div><div class="line">angular</div><div class="line">    .module(<span class="string">'app'</span>)</div><div class="line">    .factory(<span class="string">'logger'</span>, logger);</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">logger</span> (<span class="params"></span>) </span>&#123; &#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>在controller中需要先把$scope复制给可捕获的变量，选择一个有代表性的名称，例如vm代表ViewModel（方便controller as 语法糖之间的切换）</p>
-<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Customer</span> (<span class="params">$scope</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> vm = $scope;</div><div class="line">    vm.name = &#123;&#125;;</div><div class="line">    vm.sendMessage = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; &#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>可绑定成员放到顶部（注：如果一个函数就是一行，那么只要不影响可读性就把它放到顶部。）</p>
- <figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Sessions</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">var</span> vm = <span class="keyword">this</span>;</div><div class="line">    </div><div class="line">  vm.gotoSession = gotoSession;</div><div class="line">  vm.refresh = refresh;</div><div class="line">  vm.search = search;</div><div class="line">  vm.sessions = [];</div><div class="line">  vm.title = <span class="string">'Sessions'</span>;</div><div class="line">    </div><div class="line">  <span class="comment">////////////</span></div><div class="line">    </div><div class="line">  <span class="function"><span class="keyword">function</span> <span class="title">gotoSession</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="comment">/* */</span></div><div class="line">  &#125;</div><div class="line">    </div><div class="line">  <span class="function"><span class="keyword">function</span> <span class="title">refresh</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="comment">/* */</span></div><div class="line">  &#125;</div><div class="line">    </div><div class="line">  <span class="function"><span class="keyword">function</span> <span class="title">search</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="comment">/* */</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>保持Controller的专一性，一个view定义一个controller，尽量不要在其它view中使用这个controller。把可重用的逻辑放到factory中，保证controller只服务于当前视图</p>
-</li>
-<li>独立的数据调用（Data Services）：<ul>
-<li>把进行数据操作和数据交互的逻辑放到factory中，数据服务负责XHR请求、本地存储、内存存储和其它任何数据操作</li>
-<li>数据服务被调用时（例如controller），隐藏调用的直接行为</li>
-<li>数据调用返回一个Promise</li>
-</ul>
-</li>
-<li>Directives<ul>
-<li>一个dirctive一个文件</li>
-<li>提供一个唯一的Directive前缀，格式：{namespace}-指令名称</li>
-</ul>
-</li>
-<li><p>压缩处理（防止压缩导致出错）：</p>
-<ul>
-<li>手动添加依赖<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">angular</div><div class="line">    .module(<span class="string">'app'</span>)</div><div class="line">    .controller(<span class="string">'Dashboard'</span>, Dashboard);</div><div class="line"></div><div class="line">Dashboard.$inject = [<span class="string">'$location'</span>, <span class="string">'$routeParams'</span>, <span class="string">'common'</span>, <span class="string">'dataservice'</span>];</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Dashboard</span>(<span class="params">$location, $routeParams, common, dataservice</span>) </span>&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-<li><p>Controller命名: 使用UpperCamelCase（每个单词首字母大写）的方式；后缀使用Controller；例如：AvengersController</p>
-</li>
-<li>Service命名： 对service和factory使用camel-casing（驼峰式，第一个单词首字母小写，后面单词首字母大写）方式。避免使用$前缀。</li>
-<li>Directive组件命名： 使用camel-case方式，用一个短的前缀来描述directive在哪个区域使用（一些例子中是使用公司前缀或是项目前缀）</li>
-</ol>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">前端</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">书写规范</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2015/08/05/dev-2015-08-05-angular-writing-standard/">展开全文 >></a>
         </p>
       
 
@@ -1354,10 +1382,6 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">jquery插件</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">angular</a>
               </li>
              
@@ -1366,7 +1390,7 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
+                <a href="javascript:void(0)" class="js-tag color5">项目实战</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1374,23 +1398,15 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">项目实战</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">后端</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">java</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">maven</a>
+                <a href="javascript:void(0)" class="js-tag color4">jquery插件</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1398,11 +1414,23 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">医疗</a>
+                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
+                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">后端</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">maven</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">医疗</a>
               </li>
             
             <div class="clearfix"></div>

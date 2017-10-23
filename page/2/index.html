@@ -148,6 +148,248 @@ var _hmt = _hmt || [];
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-dev-2015-09-22-angular-project" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/22/dev-2015-09-22-angular-project/">AngularJS 项目开发实战</a>
+    </h1>
+  
+
+        
+        <a href="/2015/09/22/dev-2015-09-22-angular-project/" class="archive-article-date">
+  	<time datetime="2015-09-22T11:38:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-09-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><blockquote>
+<ol>
+<li>啰嗦一下</li>
+<li>你问我答</li>
+<li>目录结构</li>
+<li>压缩</li>
+<li>其他</li>
+</ol>
+</blockquote>
+<h2 id="啰嗦一下"><a href="#啰嗦一下" class="headerlink" title="啰嗦一下"></a>啰嗦一下</h2><p>最近在开发一个项目时，调研了一下AngularJS，发现这个框架功能很丰富，而且用起来也很方便，所以深入了解了一下，在此分享一下我的感悟。</p>
+<p>AngularJS是一个MVVM框架，所谓MVVM框架，即：Model-View-ViewModel，通俗一点的解释是：当数据发生变化时，框架自动进行数据绑定，自动更新页面上的数据。</p>
+<p>这一点可以说是非常“神奇”的功能，可以减少我们很多的工作量。把我们从复杂的DOM结构中解脱出来，用剩余的时间去干一点有用的事情。</p>
+<p>试想一下，当你和女神谈天说地，聊得不亦乐乎的时候，你突然发现自己的操作DOM的代码有点问题，改来改去改了好久才把问题解决掉，再回头和女神聊天，发现女神的笑容依旧那么美丽，但确是和隔壁使用AngularJS框架的王哥，这是多么悲伤场景啊！也许就在你修改代码期间，一段美好的姻缘就随风消逝了。这不能说是你们没有缘分，而是你选错了框架啊！</p>
+<p>说了很多AngularJS的好话，也要澄清一点，没有东西是完美的，AngularJS也有一些缺点，比如说，AngularJS自身框架的一些bug，不适合界面频繁交互的场景（如：游戏类网站）等，好在现在的网站大部分都是CRUD型的应用，你可以放心用了。</p>
+<p>下面我们就正式介绍一下AngularJS的相关知识点以及在项目中的应用，先进入到你问我答环节，看看群众们有哪些疑惑。</p>
+<h2 id="你问我答"><a href="#你问我答" class="headerlink" title="你问我答"></a>你问我答</h2><p><strong>问：</strong> AngularJS 适合构建什么类型的应用？<br><strong>答：</strong> AngularJS 适合做单页面应用程序（SPA应用），但是需要注意的是，并不是一个项目只能有一个页面应用，例如：做管理系统时，你可能需要为三种不同的账户提供三种不同的页面入口，master、guest、friend，你可以创建三个页面入口，每个页面是一个应用，并提供相应的页面入口即可。</p>
+<p><strong>问：</strong> 我以前做前端时，都是使用JQuery开发的，他们有什么区别吗？<br><strong>答：</strong> 有本质的区别，推荐你看一篇文章 <a href="http://blog.jobbole.com/76265/" title="jQuery开发者眼中的AngularJS" target="_blank" rel="external">jQuery开发者眼中的AngularJS</a></p>
+<p><strong>问：</strong> AngularJS不能做游戏网站，但是Jquery可以啊，这么说来AngularJS没JQuery好用啊？<br><strong>答：</strong> 如果你要是做游戏网站的话，你确实需要使用偏底层的JQuery，但是却不能说哪个好不好用，场景不同，需求也就不同，使用的技术也不同。</p>
+<p><strong>问：</strong> 如果用了AngularJS，我之前使用的JQuery或JS插件是不是就不能用了啊？<br><strong>答：</strong> 是的，他们不能同时使用，有一些JS插件通过修改可以在AngularJS中使用，如滑动插件iScroll，但是大多数插件都不行，如果你想实现一些效果，可以在网上找一找AngularJS的插件，很多插件都有相应的AngularJS实现，或者是兼容AngularJS的方法。</p>
+<p><em>其他问题后期再收集整理</em>，看一下项目规划的目录结构把！</p>
+<h2 id="目录结构"><a href="#目录结构" class="headerlink" title="目录结构"></a>目录结构</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">|-css</div><div class="line">|-js</div><div class="line">    |-controllers</div><div class="line">        |-index</div><div class="line">            |-a.controller.js</div><div class="line">            |-b.controller.js</div><div class="line">        |--demo</div><div class="line">    |-directives</div><div class="line">    |-filters</div><div class="line">    |-services</div><div class="line">    |-main.config.js</div><div class="line">    |-main.route.js</div><div class="line">|-templates</div><div class="line">|-libs</div></pre></td></tr></table></figure>
+<p>目录结构大概就是这样的，过滤器放在filters中，指令放在directives中，服务放在services中，main.config.js创建本服务的module和监控路由变化的事件等,<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">angular.module(<span class="string">'moduleApp'</span>, [<span class="string">"ngRoute"</span>, <span class="string">"ngTouch"</span>, <span class="string">"ngAnimate"</span>]);</div></pre></td></tr></table></figure></p>
+<p>main.route.js中配置路由信息，如：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">function</span> <span class="title">Route</span>(<span class="params">$routeProvider</span>) </span>&#123;</div><div class="line">    $routeProvider.when(<span class="string">'/demo'</span>, &#123;</div><div class="line">        <span class="attr">templateUrl</span>: <span class="string">'a.html'</span></div><div class="line">    &#125;).otherwise(&#123;</div><div class="line">        <span class="attr">redirectTo</span>: <span class="string">'/index'</span></div><div class="line">    &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>控制器放在controllers中,在controllers中需要分成具体的功能，这样防止在一个controllers有很多个js文件。</p>
+<h2 id="压缩"><a href="#压缩" class="headerlink" title="压缩"></a>压缩</h2><p>当开发完项目时，你会发现，里面有好多个JS文件，每个文件的大小都不大，但是对于前端来说，会发起很多请求，影响性能，所以我们要对文件进行压缩，可以使用gulp压缩，具体的压缩方法可以自己在网上查找，有很多文档可以查找，压缩后最常出现的问题是找不到所对应的依赖，AngularJS是通过参数名称注入的，如果不手动添加依赖，压缩之后就找不到对应的以来名称，如果你按照我前一段时间发的规范<a href="http://www.cnblogs.com/tgwang/p/4704589.html" title="Angularjs书写规范" target="_blank" rel="external">Angularjs书写规范</a>开发的话,压缩不会有什么问题。<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">手动添加依赖</div><div class="line">angular</div><div class="line">    .module(<span class="string">'app'</span>)</div><div class="line">    .controller(<span class="string">'Dashboard'</span>, Dashboard);</div><div class="line"></div><div class="line">Dashboard.$inject = [<span class="string">'$location'</span>, <span class="string">'$routeParams'</span>, <span class="string">'common'</span>, <span class="string">'dataservice'</span>];</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Dashboard</span>(<span class="params">$location, $routeParams, common, dataservice</span>) </span>&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h2><p>一个项目中会遇到很多问题，只有自己一点点去尝试，过一段时间会把项目中遇到的问题及解决办法整理一下，供大家参考。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">前端</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">项目实战</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/09/22/dev-2015-09-22-angular-project/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-dev-2015-08-05-angular-writing-standard" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/08/05/dev-2015-08-05-angular-writing-standard/">Angularjs书写规范</a>
+    </h1>
+  
+
+        
+        <a href="/2015/08/05/dev-2015-08-05-angular-writing-standard/" class="archive-article-date">
+  	<time datetime="2015-08-05T06:35:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2015-08-05</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="文件命名原则"><a href="#文件命名原则" class="headerlink" title="文件命名原则:"></a>文件命名原则:</h2><ol>
+<li>遵循以描述组件功能，然后是类型（可选）的方式来给所有的组件提供统一的命名<ul>
+<li>命名：feature.type.js。</li>
+<li>测试文件名（feature.type.spec.js）</li>
+</ul>
+</li>
+<li>大多数文件都有2个名字：<ul>
+<li>文件名 (avengers.controller.js)</li>
+<li>带有Angular的注册组件名 (AvengersController)</li>
+<li>测试文件名（avengers.controller.spec.js）</li>
+</ul>
+</li>
+</ol>
+<h2 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h2><ol>
+<li>一个文件只定义一个组件</li>
+<li>每一个文件都需要使用JavaScript闭包</li>
+<li>使用module的时候，避免直接用一个变量，而是使用getter的链式语法。<ul>
+<li>设置module，<code>angular.module(&#39;app&#39;, []);</code>。</li>
+<li>获取module，<code>angular.module(&#39;app&#39;);</code>。 </li>
+</ul>
+</li>
+<li><p><span>回调函数使用命名函数，不要用匿名函数</span></p>
+ <figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// logger.js</span></div><div class="line">angular</div><div class="line">    .module(<span class="string">'app'</span>)</div><div class="line">    .factory(<span class="string">'logger'</span>, logger);</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">logger</span> (<span class="params"></span>) </span>&#123; &#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>在controller中需要先把$scope复制给可捕获的变量，选择一个有代表性的名称，例如vm代表ViewModel（方便controller as 语法糖之间的切换）</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Customer</span> (<span class="params">$scope</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> vm = $scope;</div><div class="line">    vm.name = &#123;&#125;;</div><div class="line">    vm.sendMessage = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; &#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>可绑定成员放到顶部（注：如果一个函数就是一行，那么只要不影响可读性就把它放到顶部。）</p>
+ <figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Sessions</span>(<span class="params"></span>) </span>&#123;</div><div class="line">  <span class="keyword">var</span> vm = <span class="keyword">this</span>;</div><div class="line">    </div><div class="line">  vm.gotoSession = gotoSession;</div><div class="line">  vm.refresh = refresh;</div><div class="line">  vm.search = search;</div><div class="line">  vm.sessions = [];</div><div class="line">  vm.title = <span class="string">'Sessions'</span>;</div><div class="line">    </div><div class="line">  <span class="comment">////////////</span></div><div class="line">    </div><div class="line">  <span class="function"><span class="keyword">function</span> <span class="title">gotoSession</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="comment">/* */</span></div><div class="line">  &#125;</div><div class="line">    </div><div class="line">  <span class="function"><span class="keyword">function</span> <span class="title">refresh</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="comment">/* */</span></div><div class="line">  &#125;</div><div class="line">    </div><div class="line">  <span class="function"><span class="keyword">function</span> <span class="title">search</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="comment">/* */</span></div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>保持Controller的专一性，一个view定义一个controller，尽量不要在其它view中使用这个controller。把可重用的逻辑放到factory中，保证controller只服务于当前视图</p>
+</li>
+<li>独立的数据调用（Data Services）：<ul>
+<li>把进行数据操作和数据交互的逻辑放到factory中，数据服务负责XHR请求、本地存储、内存存储和其它任何数据操作</li>
+<li>数据服务被调用时（例如controller），隐藏调用的直接行为</li>
+<li>数据调用返回一个Promise</li>
+</ul>
+</li>
+<li>Directives<ul>
+<li>一个dirctive一个文件</li>
+<li>提供一个唯一的Directive前缀，格式：{namespace}-指令名称</li>
+</ul>
+</li>
+<li><p>压缩处理（防止压缩导致出错）：</p>
+<ul>
+<li>手动添加依赖<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">angular</div><div class="line">    .module(<span class="string">'app'</span>)</div><div class="line">    .controller(<span class="string">'Dashboard'</span>, Dashboard);</div><div class="line"></div><div class="line">Dashboard.$inject = [<span class="string">'$location'</span>, <span class="string">'$routeParams'</span>, <span class="string">'common'</span>, <span class="string">'dataservice'</span>];</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">Dashboard</span>(<span class="params">$location, $routeParams, common, dataservice</span>) </span>&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>Controller命名: 使用UpperCamelCase（每个单词首字母大写）的方式；后缀使用Controller；例如：AvengersController</p>
+</li>
+<li>Service命名： 对service和factory使用camel-casing（驼峰式，第一个单词首字母小写，后面单词首字母大写）方式。避免使用$前缀。</li>
+<li>Directive组件命名： 使用camel-case方式，用一个短的前缀来描述directive在哪个区域使用（一些例子中是使用公司前缀或是项目前缀）</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">前端</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">angular</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">书写规范</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2015/08/05/dev-2015-08-05-angular-writing-standard/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-dev-2015-07-08-jquery-file-upload" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -180,7 +422,7 @@ var _hmt = _hmt || [];
 <li>js/cors/jquery.xdr-transport.js 在IE下应载入此文件解决跨域问题</li>
 </ul>
 <p>官网事例：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE HTML&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>jQuery File Upload Example<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">"fileupload"</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"files[]"</span> <span class="attr">data-url</span>=<span class="string">"server/php/"</span> <span class="attr">multiple</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/vendor/jquery.ui.widget.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.iframe-transport.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.fileupload.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="xml"></span></div><div class="line">$(function () &#123;</div><div class="line">    $('#fileupload').fileupload(&#123;</div><div class="line">        dataType: 'json',</div><div class="line">        done: function (e, data) &#123;</div><div class="line">            $.each(data.result.files, function (index, file) &#123;</div><div class="line">                $('<span class="tag">&lt;<span class="name">p</span>/&gt;</span>').text(file.name).appendTo(document.body);</div><div class="line">            &#125;);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&#125;);</div><div class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span> </div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE HTML&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"utf-8"</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>jQuery File Upload Example<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">input</span> <span class="attr">id</span>=<span class="string">"fileupload"</span> <span class="attr">type</span>=<span class="string">"file"</span> <span class="attr">name</span>=<span class="string">"files[]"</span> <span class="attr">data-url</span>=<span class="string">"server/php/"</span> <span class="attr">multiple</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/vendor/jquery.ui.widget.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.iframe-transport.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/jquery.fileupload.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="javascript"></span></div><div class="line">$(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">    $(<span class="string">'#fileupload'</span>).fileupload(&#123;</div><div class="line">        <span class="attr">dataType</span>: <span class="string">'json'</span>,</div><div class="line">        <span class="attr">done</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</div><div class="line">            $.each(data.result.files, <span class="function"><span class="keyword">function</span> (<span class="params">index, file</span>) </span>&#123;</div><div class="line">                $(<span class="string">'&lt;p/&gt;'</span>).text(file.name).appendTo(<span class="built_in">document</span>.body);</div><div class="line">            &#125;);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&#125;);</div><div class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span> </div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure>
 <p>当我们需要点击按钮才能提交上传的时候，<a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Basic-plugin#how-to-start-uploads-with-a-button-click" target="_blank" rel="external">按钮上传</a></p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">$(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">    $(<span class="string">'#fileupload'</span>).fileupload(&#123;</div><div class="line">        <span class="attr">dataType</span>: <span class="string">'json'</span>,</div><div class="line">        <span class="attr">add</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</div><div class="line">            data.context = $(<span class="string">'&lt;button/&gt;'</span>).text(<span class="string">'Upload'</span>)</div><div class="line">                .appendTo(<span class="built_in">document</span>.body)</div><div class="line">                .click(<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</div><div class="line">                    data.context = $(<span class="string">'&lt;p/&gt;'</span>).text(<span class="string">'Uploading...'</span>).replaceAll($(<span class="keyword">this</span>));</div><div class="line">                    data.submit();</div><div class="line">                &#125;);</div><div class="line">        &#125;,</div><div class="line">        <span class="attr">done</span>: <span class="function"><span class="keyword">function</span> (<span class="params">e, data</span>) </span>&#123;</div><div class="line">            data.context.text(<span class="string">'Upload finished.'</span>);</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
 <h2 id="浅谈设计原理"><a href="#浅谈设计原理" class="headerlink" title="浅谈设计原理"></a>浅谈设计原理</h2><ol>
@@ -354,10 +596,6 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">jquery插件</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">angular</a>
               </li>
              
@@ -366,7 +604,7 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
+                <a href="javascript:void(0)" class="js-tag color5">项目实战</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -374,23 +612,15 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">项目实战</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">后端</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">java</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">maven</a>
+                <a href="javascript:void(0)" class="js-tag color4">jquery插件</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -398,11 +628,23 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">医疗</a>
+                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
+                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">后端</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">maven</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">医疗</a>
               </li>
             
             <div class="clearfix"></div>

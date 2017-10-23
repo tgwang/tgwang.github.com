@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvmg4yxj20ec00vq2p.jpg">
 <meta property="og:image" content="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvord68j20aw07g74b.jpg">
 <meta property="og:image" content="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvnodsfj20d000pgld.jpg">
-<meta property="og:updated_time" content="2017-07-25T14:19:31.059Z">
+<meta property="og:updated_time" content="2017-07-31T00:44:04.925Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java8学习之lambda表达式（一）">
 <meta name="twitter:description" content="lambda表达式的使用目的 增加代码可读性 简化编码  语法 语法形式：parameter -&amp;gt; expression body 语法组成：参数列表 + 箭头[-&amp;gt;] + 表达式体，如：(int x, int y) -&amp;gt; x + y或(x, y) -&amp;gt; x + y  说明 类型声明：参数的类型可以不声明，编译器可以根据参数值推断出其类型。 参数括号：单个参数的话，不需要使">
@@ -209,7 +209,7 @@ var _hmt = _hmt || [];
 <p>匿名类代码及编译后生成的文件：<br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvn6hfqj20cr098aa7.jpg" alt="匿名类源代码"><br><img src="http://wx4.sinaimg.cn/mw690/8d4fceccgy1fhwgvmg4yxj20ec00vq2p.jpg" alt="匿名类字节码文件"></p>
 <p>lambda表达式代码及编译后生成的代码：<br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvord68j20aw07g74b.jpg" alt="lambda表达式源代码"><br><img src="http://wx3.sinaimg.cn/mw690/8d4fceccgy1fhwgvnodsfj20d000pgld.jpg" alt="lambda表达式字节码文件"></p>
 <p>可以看到：<br>匿名类实现的代码会在编译时编译成内部类字节码，而lambda表达式实现的代码在编译后没有内部类字节码，这是因为lambda表达式实现的代码是在运行时动态生成内部类的，这个与编译时生成内部类的实现方式是不同的。</p>
-<p>下一节我们将深入研究lambda表达式生成的字节码文件，了解lambda表达式的编译和执行机制，敬请期待。</p>
+<p>下一节我们将深入研究lambda表达式相关的源码，了解lambda表达式的编译和执行机制，敬请期待。</p>
 
       
 
@@ -296,6 +296,15 @@ var _hmt = _hmt || [];
 
   
 <nav id="article-nav">
+  
+    <a href="/2017/07/30/dev-2017-07-30-java-lambda-code/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          dev-2017-07-30-java-lambda-code
+        
+      </div>
+    </a>
   
   
     <a href="/2017/07/22/med-2017-07-22-medical-in-future/" id="article-nav-older" class="article-nav-link-wrap">
@@ -420,10 +429,6 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">jquery插件</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">angular</a>
               </li>
              
@@ -432,7 +437,7 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
+                <a href="javascript:void(0)" class="js-tag color5">项目实战</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -440,23 +445,15 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">项目实战</a>
-              </li>
-             
-              <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">后端</a>
-              </li>
-             
-              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">java</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">maven</a>
+                <a href="javascript:void(0)" class="js-tag color4">jquery插件</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+                <a href="javascript:void(0)" class="js-tag color1">混合式开发</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -464,11 +461,23 @@ var _hmt = _hmt || [];
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">医疗</a>
+                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">webpack</a>
+                <a href="javascript:void(0)" class="js-tag color5">HTTP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">后端</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">maven</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">医疗</a>
               </li>
             
             <div class="clearfix"></div>

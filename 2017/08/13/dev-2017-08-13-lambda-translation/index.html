@@ -6,17 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://blog.yunyear.com">
-  <title>Tag: 后端 | 云叶-博客</title>
+  <title>Java8学习之如何转换Lambda表达式 | 云叶-博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
-<meta property="og:type" content="website">
-<meta property="og:title" content="云叶-博客">
-<meta property="og:url" content="http://blog.yunyear.com/tags/后端/index.html">
+  <meta name="description" content="本篇文章是对Translation of Lambda Expressions的翻译，本文基本是逐句翻译，其中也加入了一些个人的理解，如有翻译不准确的地方请指正。  Java如何转换Lambda表达式关于本文档本文档概述了将lambda表达式和方法引用从Java源代码转换为字节码的策略。Java的Lambda表达式由JSR 335定义并在OpenJDK Lambda Project中实现。语言特">
+<meta name="keywords" content="java,lambda表达式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java8学习之如何转换Lambda表达式">
+<meta property="og:url" content="http://blog.yunyear.com/2017/08/13/dev-2017-08-13-lambda-translation/index.html">
 <meta property="og:site_name" content="云叶-博客">
-<meta property="og:description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
+<meta property="og:description" content="本篇文章是对Translation of Lambda Expressions的翻译，本文基本是逐句翻译，其中也加入了一些个人的理解，如有翻译不准确的地方请指正。  Java如何转换Lambda表达式关于本文档本文档概述了将lambda表达式和方法引用从Java源代码转换为字节码的策略。Java的Lambda表达式由JSR 335定义并在OpenJDK Lambda Project中实现。语言特">
+<meta property="og:updated_time" content="2017-08-30T03:56:12.777Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="云叶-博客">
-<meta name="twitter:description" content="云叶,云叶网,云叶博客,yunyear,YunYear,是一个技术博客,也是一个生活博客,观点绝不中立">
+<meta name="twitter:title" content="Java8学习之如何转换Lambda表达式">
+<meta name="twitter:description" content="本篇文章是对Translation of Lambda Expressions的翻译，本文基本是逐句翻译，其中也加入了一些个人的理解，如有翻译不准确的地方请指正。  Java如何转换Lambda表达式关于本文档本文档概述了将lambda表达式和方法引用从Java源代码转换为字节码的策略。Java的Lambda表达式由JSR 335定义并在OpenJDK Lambda Project中实现。语言特">
   
     <link rel="alternative" href="/atom.xml" title="云叶-博客" type="application/atom+xml">
   
@@ -146,36 +148,121 @@ var _hmt = _hmt || [];
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-dev-2017-08-13-lambda-translation" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/01/10/dev-2016-01-10-maven-pom/" class="archive-article-date">
-  	<time datetime="2016-01-10T00:33:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-01-10</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/01/10/dev-2016-01-10-maven-pom/">Maven POM详解</a>
+    <h1 class="article-title" itemprop="name">
+      Java8学习之如何转换Lambda表达式
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2017/08/13/dev-2017-08-13-lambda-translation/" class="archive-article-date">
+  	<time datetime="2017-08-13T03:53:31.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-13</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>本篇文章是对<a href="http://cr.openjdk.java.net/~briangoetz/lambda/lambda-translation.html" target="_blank" rel="external">Translation of Lambda Expressions</a>的翻译，本文基本是逐句翻译，其中也加入了一些个人的理解，如有翻译不准确的地方请指正。</p>
+</blockquote>
+<h1 id="Java如何转换Lambda表达式"><a href="#Java如何转换Lambda表达式" class="headerlink" title="Java如何转换Lambda表达式"></a>Java如何转换Lambda表达式</h1><h2 id="关于本文档"><a href="#关于本文档" class="headerlink" title="关于本文档"></a>关于本文档</h2><p>本文档概述了将lambda表达式和方法引用从Java源代码转换为字节码的策略。Java的Lambda表达式由<a href="http://jcp.org/en/jsr/detail?id=335" target="_blank" rel="external">JSR 335</a>定义并在OpenJDK <a href="http://openjdk.java.net/projects/lambda/" target="_blank" rel="external">Lambda Project</a>中实现。语言特征的概述可以在<a href="http://cr.openjdk.java.net/~briangoetz/lambda/lambda-state-4.html" target="_blank" rel="external">State of the Lambda</a>中找到。</p>
+<p>本文档涉及当编译器遇到lambda表达式时如何法转换成字节码，以及语言运行时如何参与评估lambda表达式。本文档的大部分内容涉及函数式接口转换技术。</p>
+<p>函数式接口是lambda表达式的核心。函数式接口是只有一个抽象方法（原文是：non-Object method）的接口，例如：<code>Runnable</code>, <code>Comparator</code>等。（Java库已经使用这样的接口来表示回调很多年了）</p>
+<p>Lambda表达式只能分配给类型为函数式接口的变量。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Runnable r = () -&gt; &#123; System.out.println(<span class="string">"hello"</span>); &#125;;</div></pre></td></tr></table></figure>
+<p>或者</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Collections.sort(strings, (String a, String b) -&gt; -(a.compareTo(b)));</div></pre></td></tr></table></figure>
+<p>编译器生成的用于捕获这些lambda表达式的代码取决于lambda表达式本身以及它所分配的函数式接口类型。</p>
+<h2 id="依赖与符号"><a href="#依赖与符号" class="headerlink" title="依赖与符号"></a>依赖与符号</h2><p>转换方案依赖于<a href="http://jcp.org/en/jsr/detail?id=292" target="_blank" rel="external">JSR 292</a>的几项功能，包括<code>invokedynamic</code>、方法句柄（<code>method handles</code>）和用于方法句柄（<code>method handles</code>）和方法类型（<code>method types</code>）增强的LDC【LoaD Constant】字节码表单。</p>
+<p>由于这些不能再Java源码中展示，我们的示例将使用这些功能的伪代码：</p>
+<ul>
+<li>方法句柄常量使用<code>MH([refKind] class-name.method-name)</code>表示</li>
+<li>方法类型常量使用<code>MT(method-signature)</code>表示</li>
+<li><code>invokedynamic</code>指令使用<code>INDY((bootstrap, static args...)(dynamic args...))</code>表示</li>
+</ul>
+<p>读者应该具备<a href="http://jcp.org/en/jsr/detail?id=292" target="_blank" rel="external">JSR 292</a>功能的知识。</p>
+<p>转换方案还采取正在由Java SE 8的JSR-292专家组指定的新功能：用于反射常量方法句柄的API。</p>
+<h2 id="转换策略"><a href="#转换策略" class="headerlink" title="转换策略"></a>转换策略</h2><p>我们可以通过多种方式在字节码中表示lambda表达式，例如内部类，方法句柄【<code>method handles</code>】，动态代理【<code>dynamic proxies</code>】等，每种方案都有利弊。在选择策略时，有两个竞争的目标：通过不提交特定策略来最大化未来优化的灵活性，同时也要在class文件中是稳定的结构。我们可以通过 JSR 292 中的<code>invokedynamic</code>实现这两个目标，用以将字节码中的lambda创建的二进制表示与在运行时评估lambda表达式的机制进行分离。而不是生成字节码来创建实现lambda表达式的对象（例如调用内部类的构造函数），我们描述了构建lambda的方法，并将实际的构造委托给语言运行时。这个方法就是在<code>invokedynamic</code>指令的静态和动态参数列表中进行编码。</p>
+<p>使用<code>invokedynamic</code>可以让我们将翻译策略延迟到运行时再进行选择，运行时实现可以动态地选择策略来评估lambda表达式，运行时实现选择隐藏在lambda构造的标准化（即：平台规范的一部分）API之后，使用静态编译器可以发出对该API的调用，并且JRE实现可以选择其首选实现策略。<code>invokedynamic</code>机制不会有后期绑定方法可能施加的性能成本。</p>
+<p>当编译器遇到lambda表达式时，它首先将lambda体降低（脱糖）为一个方法，其参数列表和返回类型与lambda表达式相匹配，此方法可能还会在lambda表达式被捕获的地方增加一些额外的参数（如果有的话，将会是从词法作用域捕获的值），他生成一个<code>invokedynamic</code>调用点，当调用点被调用时，将会返回一个函数式接口（这个函数式接口是lambda表达式将要转换的目标类型）的实例。这个调用点被称为给定lambda表达式的lambda工厂。lambda工厂的动态参数是从词法作用域中捕获的值。lambda工厂的引导方法是Java语言运行时库中的标准化方法，称为：<code>lambda metafactory</code>。静态引导参数在编译时捕获已知的关于lambda的信息（将要转换的函数式接口，lambda体脱糖后生成的方法句柄，SAM类型是否可序列化的信息等）</p>
+<p>方法引用的处理方式与lambda表达式相同，除了大多数方法引用不需要被脱糖为一个新方法，我们可以简单地加载引用方法的常量方法句柄，并将其传递给元素。</p>
+<h2 id="Lambda表达式脱糖"><a href="#Lambda表达式脱糖" class="headerlink" title="Lambda表达式脱糖"></a>Lambda表达式脱糖</h2><p>将lambda表达式翻译成字节码的第一步是将lambda表达式脱糖为一个方法。</p>
+<p>围绕脱糖操作我们必须做出几种选择：</p>
+<ul>
+<li>我们脱糖为静态方法还是实例方法？</li>
+<li>应该将方法脱糖到哪个类中？</li>
+<li>脱糖方法的访问性质是什么？</li>
+<li>脱糖方法的名称是什么？</li>
+<li>如果为了弥合lambda表达式签名和函数式接口方法签名之间的差异而做一些修改（如装箱，拆箱，原始拓宽或缩小转化，可变转换等），脱糖的方法应该遵循lambda体的签名，还是函数式接口方法的签名，还是两者之间的东西？谁负责所需的修改？</li>
+<li>如果lambda从闭包中捕获参数，那么在已脱糖的方法签名中应该如何表示参数呢？（它们可以是添加到参数列表的开始或结尾的单个参数，或者编译器可以将它们收集到单个“frame”参数中。）</li>
+</ul>
+<p>关于lambda体脱糖相关的问题是方法引用是否需要 <em>生成适配器</em> 或 <em>“桥”方法</em>。</p>
+<p>编译器将推测lambda表达式的方法签名，包括参数类型，返回类型和抛出的异常。我们称之为 <strong>自然签名</strong>【<code>natural signature</code>】，Lambda表达式也有一个目标类型，它是一个函数式接口。我们将把lambda描述符称为目标类型的擦除描述符的方法签名。从lambda工厂返回的值，它实现了函数式接口并捕获了lambda的行为，我们称之为lambda对象。</p>
+<p>其它条件相同的情况下，私人的方法比非私人的方法更好，静态方法优于实例方法，最好是将lambda体脱糖到lambda表达式出现的最内层的类中，签名应该与lambda体的签名相匹配，额外的参数应该放到被捕获的值的参数列表的前面，并且不会到方法引用进行脱糖。 然而，也有例外情况，我们可能不得不偏离此基准策略。</p>
+<h2 id="脱糖示例–“无状态”的lambda表达式"><a href="#脱糖示例–“无状态”的lambda表达式" class="headerlink" title="脱糖示例–“无状态”的lambda表达式"></a>脱糖示例–“无状态”的lambda表达式</h2><p>翻译lambda表达式的最简单的形式是从闭包作用域中不捕获任何状态：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;String&gt; list = ...</div><div class="line">        list.forEach( s -&gt; &#123; System.out.println(s); &#125; );</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>lambda表达式的自然签名是<code>(String)V</code>,<code>forEach</code>方法使用一个<code>Block&lt;String&gt;</code>，她的lambda描述符为<code>(Object)V</code>，编译器将lambda体脱糖成一个静态方法，该方法的签名是自然签名，并且为该方法生成一个名称。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;String&gt; list = ...</div><div class="line">        list.forEach( [lambda <span class="keyword">for</span> lambda$<span class="number">1</span> as Block] );</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="keyword">void</span> lambda$<span class="number">1</span>(String s) &#123;</div><div class="line">        System.out.println(s);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="脱糖示例–lambda表达式捕获不变的值"><a href="#脱糖示例–lambda表达式捕获不变的值" class="headerlink" title="脱糖示例–lambda表达式捕获不变的值"></a>脱糖示例–lambda表达式捕获不变的值</h2><p>lambda表达式的另一种形式涉及捕获闭包的<code>final</code>（或<code>有效final</code>）局部变量和/或闭包实例的字段（我们可以把它看作是闭包中对<code>final</code>类型的<code>this</code>引用的捕获）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;Person&gt; list = ...</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> bottom = ..., top = ...;</div><div class="line">        list.removeIf( p -&gt; (p.size &gt;= bottom &amp;&amp; p.size &lt;= top) );</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里，我们的lambda从闭包作用域中捕获<code>final</code>类型的局部变量<code>bottom</code>和<code>top</code>。</p>
+<p>已脱糖方法的签名将由自然签名<code>(Person)Z</code>和在参数列表前面的额外参数组成，编译器对于这些额外参数是如何表示的有一定的余地；他们可以被单独添加，也可以包装到一个<code>frame</code>类中，还可以包装到一个数组中。其中最简单的方式就是单独添加：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">        List&lt;Person&gt; list = ...</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> bottom = ..., top = ...;</div><div class="line">        list.removeIf( [ <span class="function">lambda <span class="keyword">for</span> lambda$1 as Predicate <span class="title">capturing</span> <span class="params">(bottom, top)</span> ])</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> lambda$<span class="number">1</span>(<span class="keyword">int</span> bottom, <span class="keyword">int</span> top, Person p) &#123;</div><div class="line">        <span class="keyword">return</span> (p.size &gt;= bottom &amp;&amp; p.size &lt;= top;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>或者，捕获的值（<code>bottom</code> 和 <code>top</code>）可以被包装在一个<code>frame</code>类或一个数组中；其中最关键是已脱糖的lambda方法的签名中出现的额外参数的类型和它们作为lambda工厂的（动态）参数的类型的一致性。由于编译器控制了这两个，并且它们同时生成，因此编译器在捕获参数的打包方式上有一定的灵活性。</p>
+<h2 id="Lambda-Metafactory"><a href="#Lambda-Metafactory" class="headerlink" title="Lambda Metafactory"></a>Lambda Metafactory</h2><p>Lambda的捕获将由<code>invokedynamic</code>调用点实现，其静态参数描述了lambda体和lambda描述符的特征，其动态参数（如果有的话）是捕获的值。当被调用时，此调用站点返回对应的lambda体和描述符的lambda对象，并绑定到捕获的值。这个调用点的引导方法是一个指定的平台方法，称为<code>metafactory</code>。（我们可以为所有lambda形式提供一个单一的<code>metafactory</code>，或者为常见情况提供专门的版本。）虚拟机对于每个捕获的点只调用一次<code>metafactory</code>；此后，它将绕开<code>metafactory</code>直接链接到调用点。调用点是惰性进行链接的，因此未调用的工厂站点将不会进行链接。基础的metafactory的静态参数列表如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">metaFactory(MethodHandles.Lookup caller, <span class="comment">// provided by VM</span></div><div class="line">            String invokedName,          <span class="comment">// provided by VM</span></div><div class="line">            MethodType invokedType,      <span class="comment">// provided by VM</span></div><div class="line">            MethodHandle descriptor,     <span class="comment">// lambda descriptor</span></div><div class="line">            MethodHandle impl)           <span class="comment">// lambda body</span></div></pre></td></tr></table></figure>
+<p>前三个参数（caller，invokedName，invokedType）由VM在调用站点链接时自动赋值。</p>
+<p><code>descriptor</code>参数标识lambda表达式将要转换的函数式接口方法。（通过方法句柄的反射API，<code>metafactory</code>可以获取函数式接口类的名称及其主要方法的名称和方法签名。）</p>
+<p><code>impl</code>参数标识lambda方法，是一个已脱糖的lambda体或者是方法引用中已命名的方法。</p>
+<p>函数式接口方法与实现方法的方法签名可能存在一些差异。实现方法可能具有与捕获的参数相对应的额外参数。其余的参数也可能不能完全匹配；在适配过程中允许进行某些适配（如：子类型、装箱操作）。</p>
+<h2 id="Lambda-捕获"><a href="#Lambda-捕获" class="headerlink" title="Lambda 捕获"></a>Lambda 捕获</h2><p>我们现在准备描述lambda表达式和方法引用的函数式接口转换的翻译过程。我们可以将例子A翻译成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">foo</span><span class="params">()</span> </span>&#123;</div><div class="line">            List&lt;String&gt; list = ...</div><div class="line">            list.forEach(indy((MH(metaFactory), MH(invokeVirtual Block.apply),</div><div class="line">                               MH(invokeStatic A.lambda$<span class="number">1</span>)( )));</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> lambda$<span class="number">1</span>(String s) &#123;</div><div class="line">        System.out.println(s);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于在A中，lambda表达式是无状态的，lambda工厂函数的动态参数为空。</p>
+<p>例如B，动态参数列表不为空，因此我们必须向lambda工厂函数提供bottom和top的值。</p>
+<h2 id="静态-VS-实例-方法"><a href="#静态-VS-实例-方法" class="headerlink" title="静态 VS 实例 方法"></a>静态 VS 实例 方法</h2><p>像上面讨论的Lambda表达式可以转换为静态方法，因为它们不以任何方式使用闭包的对象实例（没有引用<code>this</code>，<code>super</code>或闭包实例的成员）。总的来说。我们将引用<code>this</code>，<code>super</code>或闭包实例的成员的lambda表达式作为<em>实例捕获【<code>instance-capturing</code>】</em>的lambda表达式。</p>
+<p><strong><em>非实例捕获</em>的lambda表达式被转换成私有、静态方法（<code>private</code>，<code>static</code>），<em>实例捕获</em>的lambda表达式转换成私用实例方法</strong>。这简化了<em>实例捕获</em>的lambdas的脱糖过程，因为lambda体中的名称将意味着与已脱糖的方法中的名称相同，并且与可用的实现技术（绑定方法句柄）很好地关联。当捕获<em>实例捕获</em>的lambda时，接收器（this）被指定为第一个动态参数。</p>
+<p>我们研究一个捕获字段<code>minSize</code>的lambda表达式的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">list.filter(e -&gt; e.getSize() &lt; minSize )</div></pre></td></tr></table></figure>
+<p>我们将这和脱糖称为实例方法，并将接收者作为第一个捕获的参数传递：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">list.forEach(INDY((MH(metaFactory), MH(invokeVirtual Predicate.apply),</div><div class="line">                   MH(invokeVirtual B.lambda$<span class="number">1</span>))( <span class="keyword">this</span> ))));</div><div class="line"></div><div class="line"><span class="keyword">private</span> <span class="keyword">boolean</span> lambda$<span class="number">1</span>(Element e) &#123;</div><div class="line">    <span class="keyword">return</span> e.getSize() &lt; minSize;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于lambda体北翻译成为私用方法，当将<em>行为方法句柄</em>传递给<code>metafactory</code>时，捕获站点应该加载一个常量方法句柄，其引用类型为：对于实例方法为<code>REF_invokeSpecial</code>，对静态方法为<code>REF_invokeStatic</code>。</p>
+<p>我们能够脱糖为私有方法是因为捕获类可以访问私有方法，因此可以获得一个私有方法的可以被<code>metafactory</code>调用的方法句柄。（如果<code>metafactory</code>是通过生成字节码的形式实现目标的函数式接口，而不是直接调用方法句柄，它将通过<code>Unsafe.defineClass</code>加载这些类，<code>Unsafe.defineClass</code>不受可访问性检查的影响。）</p>
+<h2 id="方法引用捕获"><a href="#方法引用捕获" class="headerlink" title="方法引用捕获"></a>方法引用捕获</h2><p>有多种形式的方法引用，像lambdas一样，可以分为<em>实例捕获</em>和<em>非实例捕获</em>。非实例捕获方法引用包括静态方法引用（<code>Integer::parseInt</code>，以引用类型<code>invokeStatic</code>捕获），不受约束的方法实例引用（<code>String::length</code>，以引用类型<code>invokeVirtual</code>捕获），和顶级构造函数引用（<code>Foo::new</code>，以引用类型<code>invoke_newSpecial</code>捕获），捕获<em>非实例捕获</em>方法引用时，捕获的参数列表始终为空：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">list.filter(String::isEmpty)</div></pre></td></tr></table></figure>
+<p>被翻译成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">list.filter(indy(MH(metaFactory), MH(invokeVirtual Predicate.apply),</div><div class="line">                 MH(invokeVirtual String.isEmpty))()))</div></pre></td></tr></table></figure>
+<p><em>实例捕获</em>方法引用形式包括绑定实例方法引用（<code>s::length</code>，以引用类型<code>invokeVirtual</code>捕获），<code>super</code>方法引用（<code>super::foo</code>，以引用类型<code>invokeSpecial</code>捕获），和内部类构造器引用（<code>Inner::new</code>，以引用类型<code>invokeNewSpecial</code>捕获）。捕获<em>实例捕获</em>方法引用时，捕获的参数列表总是具有单个参数，这个参数在超类或内部类构造方法引用的情况下是<code>this</code>，在绑定实例方法引用的情况下是<strong>指定的接收者</strong></p>
+<h2 id="可变参数"><a href="#可变参数" class="headerlink" title="可变参数"></a>可变参数</h2><p>如果将可变参数方法的方法引用转换为不是可变参数方法的函数式接口，编译器必须生成一个<strong>桥接方法</strong>并捕获<strong>桥接方法</strong>的句柄，而不是目标方法本身。<strong>桥接方法</strong>必须处理任何需要修改的参数类型，以及可变参数转换为非可变参数的操作。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IIS</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">void</span> <span class="title">foo</span><span class="params">(Integer a1, Integer a2, String a3)</span></span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Foo</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">m</span><span class="params">(Number a1, Object... rest)</span> </span>&#123; ... &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">void</span> <span class="title">bar</span><span class="params">()</span> </span>&#123;</div><div class="line">        SIS x = Foo::m;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在这里，编译器需要生成一个<em>桥</em>，将第一个参数的类型从<code>Number</code>调整为<code>Integer</code>，并将其余的参数放到一个<code>Object</code>数组中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Bar</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">void</span> <span class="title">bar</span><span class="params">()</span> </span>&#123;</div><div class="line">        SIS x = indy((MH(metafactory), MH(invokeVirtual IIS.foo),</div><div class="line">                      MH(invokeStatic m$bridge))( ))</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">static</span> <span class="keyword">private</span> <span class="keyword">void</span> m$bridge(Integer a1, Integer a2, String a3) &#123;</div><div class="line">        Foo.m(a1, a2, a3);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h2><p>已脱糖的lambda方法有一个参数列表和一个返回类型：<code>(A1..An) -&gt; Ra</code>（如果已脱糖的方法是实例方法，则接收者被认为是第一个参数），函数式接口同样也有一个参数列表和返回类型：<code>(F1..Fm) -&gt; Rf</code>（没有接收者参数）。工厂方法的动态参数具有参数类型<code>(D1..Dk)</code>。如果lambda表达式是<em>实例捕获</em>类型，第一个动态参数一定是接收者。</p>
+<p>这些长度相加必须如下：<code>k+m == n</code>。也就是说，lambda体参数列表应该与动态参数列表和函数式接口方法参数列表的组合一样长。</p>
+<p>我们将lambda体的参数列表<code>A1..An</code>分成<code>(D1..Dk H1..Hm)</code>，其中<code>D</code>参数与“额外的”（动态）参数相对应，<code>H</code>参数与函数式接口参数相对应。</p>
+<p>我们需要将<code>Hi</code>修改为<code>Fi</code>（<code>i</code>为<code>1..m</code>中的一个序号），同样的，我们也需要将<code>Ra</code>修改为<code>Rf</code>。如果有以下情况，<code>T</code>类型修改为<code>U</code>类型：</p>
+<ul>
+<li><code>T == U</code></li>
+<li><code>T</code>是原始类型，<code>U</code>是引用类型，<code>T</code>可以通过装箱操作转换为<code>U</code></li>
+<li><code>T</code>是引用类型，<code>U</code>是原始类型，<code>T</code>可以通过拆箱操作转换为<code>U</code></li>
+<li><code>T</code>和<code>U</code>是原始类型，<code>T</code>可以通过<em>原始加宽转换</em>操作转换为<code>U</code></li>
+<li><code>T</code>和<code>U</code>是引用类型，<code>T</code>可以转换为<code>U</code></li>
+</ul>
+<p><code>metafactory</code>在<strong>连接阶段</strong>对修改进行验证，并在<strong>捕获阶段</strong>执行。</p>
+<h2 id="Metafactory-变种"><a href="#Metafactory-变种" class="headerlink" title="Metafactory 变种"></a>Metafactory 变种</h2><p>对于所有的lambda形式都有一个单一的<code>metafactory</code>是很实用的，然而，将<code>metafactory</code>分成多个版本似乎更为可取：</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -185,29 +272,110 @@ var _hmt = _hmt || [];
         		</li>
       		 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">后端</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">maven</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">lambda表达式</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://blog.yunyear.com/2017/08/13/dev-2017-08-13-lambda-translation/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2017/07/30/dev-2017-07-30-java-lambda-code/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">dev-2017-07-30-java-lambda-code</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
 
 
           </div>
@@ -230,9 +398,9 @@ var _hmt = _hmt || [];
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
